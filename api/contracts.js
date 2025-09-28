@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = process.env.SUPABASE_URL || 'https://skyexizhdrrqunmllkza.supabase.co'
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNreWV4aXpoZHJycXVubWxsa3phIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1ODgzNjE4MSwiZXhwIjoyMDc0NDEyMTgxfQ.YourServiceRoleKeyHere'
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
 const supabase = createClient(supabaseUrl, supabaseKey)
 
@@ -16,14 +16,23 @@ export default async function handler(req, res) {
     return
   }
 
+  // Check if Supabase is properly configured
+  if (!supabaseKey) {
+    console.error('SUPABASE_SERVICE_ROLE_KEY is not set')
+    return res.status(500).json({ error: 'Server configuration error' })
+  }
+
   if (req.method === 'POST') {
     try {
+      console.log('Contract creation request received:', { body: req.body })
       const { contractData, userEmail } = req.body
 
       if (!contractData || !userEmail) {
+        console.error('Missing required fields:', { contractData: !!contractData, userEmail: !!userEmail })
         return res.status(400).json({ error: 'Missing required fields' })
       }
 
+      console.log('Looking up user:', userEmail)
       // First get the user to find their company
       const { data: user, error: userError } = await supabase
         .from('users')
@@ -33,12 +42,15 @@ export default async function handler(req, res) {
 
       if (userError) {
         console.error('User lookup error:', userError)
-        return res.status(400).json({ error: 'User not found' })
+        return res.status(400).json({ error: `User lookup failed: ${userError.message}` })
       }
 
       if (!user) {
-        return res.status(400).json({ error: 'User not found' })
+        console.error('User not found in database:', userEmail)
+        return res.status(400).json({ error: 'User not found in database' })
       }
+
+      console.log('User found:', { id: user.id, company_id: user.company_id })
 
       // Add company_id and created_by to contract data
       const contractWithCompany = {
@@ -47,6 +59,7 @@ export default async function handler(req, res) {
         created_by: user.id
       }
 
+      console.log('Creating contract with data:', contractWithCompany)
       const { data, error } = await supabase
         .from('contracts')
         .insert([contractWithCompany])
@@ -55,8 +68,10 @@ export default async function handler(req, res) {
 
       if (error) {
         console.error('Contract creation error:', error)
-        return res.status(500).json({ error: 'Failed to create contract' })
+        return res.status(500).json({ error: `Failed to create contract: ${error.message}` })
       }
+
+      console.log('Contract created successfully:', data)
 
       // Create audit log entry
       await supabase
