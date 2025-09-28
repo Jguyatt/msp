@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, Bell, CreditCard, Shield, Upload, Users, AlertTriangle, CheckCircle, Calendar, Download, ExternalLink, Lock, Settings as SettingsIcon, Search } from 'lucide-react';
+import { User, Bell, CreditCard, Upload, Users, AlertTriangle, CheckCircle, Calendar, Download, ExternalLink, Settings as SettingsIcon, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useUserSync } from '../../hooks/useUserSync';
 import { subscriptionService } from '../../services/supabaseService';
@@ -23,12 +23,9 @@ function SettingsPage() {
   // Sidebar navigation items
   const sidebarItems = [
     { id: 'profile', label: 'Profile Settings', icon: User },
-    { id: 'password', label: 'Password', icon: Lock },
-    { id: 'notifications', label: 'Notifications', icon: Bell },
     { id: 'billing', label: 'Billing & Plans', icon: CreditCard },
     { id: 'team', label: 'Team Management', icon: Users },
-    { id: 'reminders', label: 'Reminder Rules', icon: Bell },
-    { id: 'security', label: 'Security', icon: Shield }
+    { id: 'reminders', label: 'Reminder Rules', icon: Bell }
   ];
 
   // Fetch subscription data
