@@ -121,11 +121,6 @@ function SummaryHeader() {
                 Monitor your contract renewals and track performance metrics
               </p>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-                Development
-              </span>
-            </div>
           </div>
         </div>
         
@@ -180,71 +175,6 @@ function SummaryHeader() {
           ))}
         </div>
 
-        {/* Congratulations Banner */}
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6 mb-8 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-blue-100 rounded-full -translate-y-16 translate-x-16 opacity-50"></div>
-          <div className="absolute bottom-0 left-0 w-24 h-24 bg-indigo-100 rounded-full translate-y-12 -translate-x-12 opacity-50"></div>
-          
-          <div className="relative">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                  Congratulations, your contract management is working!
-                </h2>
-                <p className="text-gray-600 mb-4">
-                  Your contract tracking and renewal management is set up with automated reminders. Next, explore additional features and configuration options.
-                </p>
-                
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <div className="w-5 h-5 bg-blue-100 rounded flex items-center justify-center">
-                      <span className="text-blue-600 text-xs">🔐</span>
-                    </div>
-                    <span>Setup email notifications</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <div className="w-5 h-5 bg-blue-100 rounded flex items-center justify-center">
-                      <span className="text-blue-600 text-xs">📊</span>
-                    </div>
-                    <span>Enable analytics tracking</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <div className="w-5 h-5 bg-blue-100 rounded flex items-center justify-center">
-                      <span className="text-blue-600 text-xs">🏢</span>
-                    </div>
-                    <span>Add team collaboration</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <div className="w-5 h-5 bg-blue-100 rounded flex items-center justify-center">
-                      <span className="text-blue-600 text-xs">🔗</span>
-                    </div>
-                    <span>Configure integrations</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <div className="w-5 h-5 bg-blue-100 rounded flex items-center justify-center">
-                      <span className="text-blue-600 text-xs">💎</span>
-                    </div>
-                    <span>Go premium features</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <div className="w-5 h-5 bg-blue-100 rounded flex items-center justify-center">
-                      <span className="text-blue-600 text-xs">⚙️</span>
-                    </div>
-                    <span>And more...</span>
-                  </div>
-                </div>
-                
-                <button className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors font-medium">
-                  Set up your first contract
-                </button>
-              </div>
-              
-              <button className="ml-4 p-2 text-gray-400 hover:text-gray-600 transition-colors">
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-          </div>
-        </div>
 
         {/* Status Bar */}
         <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
