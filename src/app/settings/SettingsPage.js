@@ -334,52 +334,20 @@ function SettingsPage() {
 
   // Team Settings Component
   const renderTeamSettings = () => {
-    // Mock team data - in real app, this would come from your backend
+    // Real team data - only show the current user for now
     const teamMembers = [
       {
         id: 1,
-        name: 'Jacob Guyatt',
-        email: 'guyattj39@gmail.com',
+        name: supabaseUser?.first_name && supabaseUser?.last_name 
+          ? `${supabaseUser.first_name} ${supabaseUser.last_name}`
+          : 'Jacob Guyatt',
+        email: supabaseUser?.email || 'guyattj39@gmail.com',
         role: 'Owner',
         status: 'active',
-        avatar: 'JG',
-        joinedDate: '2024-01-15'
-      },
-      {
-        id: 2,
-        name: 'Sarah Johnson',
-        email: 'sarah.johnson@company.com',
-        role: 'Admin',
-        status: 'active',
-        avatar: 'SJ',
-        joinedDate: '2024-02-01'
-      },
-      {
-        id: 3,
-        name: 'Mike Chen',
-        email: 'mike.chen@company.com',
-        role: 'Member',
-        status: 'active',
-        avatar: 'MC',
-        joinedDate: '2024-02-15'
-      },
-      {
-        id: 4,
-        name: 'Emily Davis',
-        email: 'emily.davis@company.com',
-        role: 'Member',
-        status: 'pending',
-        avatar: 'ED',
-        joinedDate: null
-      },
-      {
-        id: 5,
-        name: 'Alex Rodriguez',
-        email: 'alex.rodriguez@company.com',
-        role: 'Member',
-        status: 'pending',
-        avatar: 'AR',
-        joinedDate: null
+        avatar: supabaseUser?.first_name && supabaseUser?.last_name 
+          ? `${supabaseUser.first_name[0]}${supabaseUser.last_name[0]}`.toUpperCase()
+          : 'JG',
+        joinedDate: new Date().toISOString().split('T')[0]
       }
     ];
 
@@ -493,6 +461,23 @@ function SettingsPage() {
                   </div>
                 </div>
               ))}
+              
+              {/* Empty state message */}
+              {teamMembers.length === 1 && (
+                <div className="px-6 py-8 text-center">
+                  <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Users className="w-8 h-8 text-slate-400" />
+                  </div>
+                  <h5 className="text-lg font-medium text-slate-900 mb-2">You're the only team member</h5>
+                  <p className="text-slate-600 mb-4">Invite team members to collaborate on contract management</p>
+                  <button 
+                    onClick={handleInviteMember}
+                    className="px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-800 transition-colors"
+                  >
+                    Invite Your First Team Member
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
