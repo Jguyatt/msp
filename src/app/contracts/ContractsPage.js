@@ -225,16 +225,16 @@ function ContractsPage({ isCompact = false }) {
   }
 
   return (
-    <div className="bg-white">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+    <div className="bg-gray-50 min-h-screen">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">
+        <div className="mb-10">
+          <div className="flex items-start justify-between mb-8">
+            <div className="flex-1">
+              <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
                 {isCompact ? 'Recent Contracts' : 'Contract Management'}
               </h1>
-              <p className="mt-2 text-gray-600">
+              <p className="mt-3 text-lg text-gray-600 leading-relaxed">
                 {isCompact 
                   ? 'Latest contract activity and renewals'
                   : 'Comprehensive contract tracking, renewal management, and automated reminders'
@@ -242,14 +242,14 @@ function ContractsPage({ isCompact = false }) {
               </p>
             </div>
                 {!isCompact && (
-                  <div className="flex items-center gap-3">
-                    <button className="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center gap-3 ml-8">
+                    <button className="inline-flex items-center gap-2 px-4 py-2.5 bg-white text-gray-700 rounded-lg border border-gray-200 hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 font-medium">
                       <Filter className="h-4 w-4" />
                       Filter
                     </button>
                     <button 
                       onClick={handleExportContracts}
-                      className="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors"
+                      className="inline-flex items-center gap-2 px-4 py-2.5 bg-white text-gray-700 rounded-lg border border-gray-200 hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 font-medium"
                     >
                       <Download className="h-4 w-4" />
                       Export
@@ -265,7 +265,7 @@ function ContractsPage({ isCompact = false }) {
                     )}
                     <button
                       onClick={handleAddContract}
-                      className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 font-medium shadow-sm hover:shadow-md"
                     >
                       <Plus className="h-4 w-4" />
                       Add Contract
@@ -276,51 +276,51 @@ function ContractsPage({ isCompact = false }) {
 
           {/* Stats Cards */}
           {!isCompact && (
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-              <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+              <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Total Contracts</p>
-                    <p className="text-2xl font-bold text-gray-900">{contracts.length}</p>
+                    <p className="text-sm font-medium text-gray-600 mb-1">Total Contracts</p>
+                    <p className="text-3xl font-bold text-gray-900">{contracts.length}</p>
                   </div>
-                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <CheckCircle2 className="h-5 w-5 text-blue-600" />
+                  <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center">
+                    <CheckCircle2 className="h-6 w-6 text-blue-600" />
                   </div>
                 </div>
               </div>
               
-              <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+              <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Expiring Soon</p>
-                    <p className="text-2xl font-bold text-red-600">{contracts.filter(c => c.daysUntil <= 30).length}</p>
+                    <p className="text-sm font-medium text-gray-600 mb-1">Expiring Soon</p>
+                    <p className="text-3xl font-bold text-red-600">{contracts.filter(c => c.daysUntil <= 30).length}</p>
                   </div>
-                  <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
-                    <AlertTriangle className="h-5 w-5 text-red-600" />
+                  <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center">
+                    <AlertTriangle className="h-6 w-6 text-red-600" />
                   </div>
                 </div>
               </div>
               
-              <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+              <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">This Month</p>
-                    <p className="text-2xl font-bold text-orange-600">{contracts.filter(c => c.daysUntil <= 60).length}</p>
+                    <p className="text-sm font-medium text-gray-600 mb-1">This Month</p>
+                    <p className="text-3xl font-bold text-orange-600">{contracts.filter(c => c.daysUntil <= 60).length}</p>
                   </div>
-                  <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                    <Calendar className="h-5 w-5 text-orange-600" />
+                  <div className="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center">
+                    <Calendar className="h-6 w-6 text-orange-600" />
                   </div>
                 </div>
               </div>
               
-              <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+              <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Renewal Rate</p>
-                    <p className="text-2xl font-bold text-green-600">94%</p>
+                    <p className="text-sm font-medium text-gray-600 mb-1">Renewal Rate</p>
+                    <p className="text-3xl font-bold text-green-600">94%</p>
                   </div>
-                  <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                    <ArrowRight className="h-5 w-5 text-green-600" />
+                  <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center">
+                    <ArrowRight className="h-6 w-6 text-green-600" />
                   </div>
                 </div>
               </div>
@@ -328,7 +328,7 @@ function ContractsPage({ isCompact = false }) {
           )}
 
           {/* Search and Filters */}
-          <div className="flex items-center gap-4 mb-6">
+          <div className="flex items-center gap-4 mb-8">
             <div className="flex-1 max-w-lg">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -337,19 +337,19 @@ function ContractsPage({ isCompact = false }) {
                   value={searchTerm}
                   onChange={handleSearchChange}
                   placeholder="Search contracts, vendors, or contract names..."
-                  className="w-full pl-10 pr-4 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-500"
+                  className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-500 transition-all duration-200"
                 />
               </div>
             </div>
             {!isCompact && (
-              <div className="flex items-center gap-2">
-                <button className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+              <div className="flex items-center gap-3">
+                <button className="px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all duration-200">
                   All Status
                 </button>
-                <button className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                <button className="px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all duration-200">
                   All Vendors
                 </button>
-                <button className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                <button className="px-3 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all duration-200">
                   <MoreHorizontal className="h-4 w-4" />
                 </button>
               </div>
