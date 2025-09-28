@@ -6,7 +6,6 @@ import ContractsPage from './contracts/ContractsPage';
 import UploadPage from './contracts/UploadPage';
 import SettingsPage from './settings/SettingsPage';
 import TeamPage from './settings/TeamPage';
-import ReportsPage from './reports/ReportsPage';
 import PlansPage from './plans/PlansPage';
 
 function AppShell() {
@@ -30,7 +29,6 @@ function AppShell() {
           />
           <Route path="/app/contracts" element={<div className="bg-gray-50 min-h-screen"><ContractsPage /></div>} />
           <Route path="/app/upload" element={<div className="bg-gray-50 min-h-screen"><UploadPage /></div>} />
-          <Route path="/app/reports" element={<div className="bg-gray-50 min-h-screen"><ReportsPage /></div>} />
           <Route path="/app/settings" element={<div className="bg-gray-50 min-h-screen"><SettingsPage /></div>} />
           <Route path="/app/team" element={<div className="bg-gray-50 min-h-screen"><TeamPage /></div>} />
           <Route path="/app/plans" element={<PlansPage />} />

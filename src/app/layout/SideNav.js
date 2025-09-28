@@ -17,8 +17,7 @@ import {
   CheckCircle,
   Home,
   FileText,
-  Upload,
-  BarChart3
+  Upload
 } from 'lucide-react';
 import useDisclosure from '../hooks/useDisclosure';
 import RenluLogo from '../../components/RenluLogo';
@@ -118,8 +117,7 @@ function SideNav() {
   const navLinks = [
     { name: 'Dashboard', path: '/app/dashboard', icon: Home },
     { name: 'Contracts', path: '/app/contracts', icon: FileText },
-    { name: 'Upload', path: '/app/upload', icon: Upload },
-    { name: 'Reports', path: '/app/reports', icon: BarChart3 }
+    { name: 'Upload', path: '/app/upload', icon: Upload }
   ];
 
   const isActive = (path) => location.pathname === path;
