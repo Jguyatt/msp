@@ -1,0 +1,34 @@
+service: stripe-eventbridge
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: us-east-2
+  stage: ${opt:stage, 'dev'}
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+          Resource: "*"
+
+functions:
+  eventbridgeHandler:
+    handler: eventbridge-handler.handler
+    events:
+      - eventBridge:
+          pattern:
+            source:
+              - stripe.com
+    timeout: 30
+    memorySize: 256
+
+plugins:
+  - serverless-offline
+
+custom:
+  serverless-offline:
+    httpPort: 4000

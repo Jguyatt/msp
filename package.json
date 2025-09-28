@@ -1,0 +1,67 @@
+{
+  "name": "renewal-guard-landing",
+  "version": "1.0.0",
+  "description": "MSP-focused Automated Contract Renewal Tracker Landing Page",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "server": "node server.js",
+    "server:supabase": "node server-supabase.js",
+    "server:stripe": "node server-stripe.js",
+    "webhook": "node webhook-handler.js",
+    "webhook:tunnel": "node start-webhook-tunnel.js",
+    "add-subscription": "node add-subscription.js",
+    "dev": "concurrently \"npm run server\" \"npm start\"",
+    "dev:supabase": "concurrently \"npm run server:supabase\" \"npm start\"",
+    "dev:stripe": "concurrently \"npm run server:stripe\" \"npm start\"",
+    "heroku-postbuild": "npm run build"
+  },
+  "dependencies": {
+    "@clerk/clerk-react": "^5.48.1",
+    "@headlessui/react": "^2.2.9",
+    "@supabase/supabase-js": "^2.58.0",
+    "@tanstack/react-table": "^8.21.3",
+    "@tanstack/react-virtual": "^3.13.12",
+    "concurrently": "^9.2.1",
+    "cors": "^2.8.5",
+    "csv-parser": "^3.2.0",
+    "date-fns": "^4.1.0",
+    "dotenv": "^17.2.2",
+    "express": "^5.1.0",
+    "lucide-react": "^0.294.0",
+    "multer": "^2.0.2",
+    "ngrok": "^5.0.0-beta.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-helmet": "^6.1.0",
+    "react-router-dom": "^7.9.3",
+    "recharts": "^3.2.1",
+    "sqlite3": "^5.1.7",
+    "stripe": "^18.5.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "autoprefixer": "^10.4.16",
+    "postcss": "^8.4.32",
+    "react-scripts": "5.0.1",
+    "serverless": "^3.40.0",
+    "serverless-offline": "^14.4.0",
+    "tailwindcss": "^3.3.6"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
