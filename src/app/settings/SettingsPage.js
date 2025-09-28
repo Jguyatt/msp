@@ -33,9 +33,9 @@ function SettingsPage() {
     { id: 'reminders', label: 'Reminder Rules', icon: Bell }
   ];
 
-  // Fetch subscription data
+  // Fetch subscription data and profile data
   useEffect(() => {
-    const fetchSubscriptionData = async () => {
+    const fetchData = async () => {
       if (userLoading || !supabaseUser) {
         setLoading(false);
         return;
@@ -75,13 +75,13 @@ function SettingsPage() {
         }
         
       } catch (error) {
-        console.error('Error fetching subscription data:', error);
+        console.error('Error fetching data:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchSubscriptionData();
+    fetchData();
   }, [supabaseUser, userLoading]);
 
   const getPlanPrice = (planName) => {
@@ -224,6 +224,147 @@ function SettingsPage() {
     } finally {
       setSavingProfile(false);
     }
+  };
+
+  // Profile Settings Component
+  const renderProfileSettings = () => {
+    return (
+      <div>
+        <h2 className="text-xl font-semibold text-gray-900 mb-6">Profile Settings</h2>
+        
+        {/* Form Fields */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              First Name *
+            </label>
+            <input
+              type="text"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              placeholder="First name"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Last Name *
+            </label>
+            <input
+              type="text"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              placeholder="Last name"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Email
+            </label>
+            <input
+              type="email"
+              value={supabaseUser?.email || "guyattj39@gmail.com"}
+              readOnly
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
+            />
+          </div>
+        </div>
+
+        {/* Save Button */}
+        <div className="mt-8 pt-6 border-t border-gray-200">
+          <button 
+            onClick={handleSaveProfile}
+            disabled={savingProfile}
+            className={`px-6 py-2 rounded-lg transition-colors font-medium ${
+              savingProfile 
+                ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
+                : 'bg-blue-600 text-white hover:bg-blue-700'
+            }`}
+          >
+            {savingProfile ? 'Saving...' : 'Save Changes'}
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  // Billing Settings Component
+  const renderBillingSettings = () => {
+    return (
+      <div>
+        <h2 className="text-xl font-semibold text-gray-900 mb-6">Billing & Plans</h2>
+        <div className="space-y-6">
+          <div className="bg-gray-50 rounded-lg p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Current Plan</h3>
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-2xl font-bold text-gray-900">Professional Plan</div>
+                <div className="text-gray-600">$79/month • 200 contracts</div>
+              </div>
+              <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                Upgrade Plan
+              </button>
+            </div>
+          </div>
+
+          <div className="bg-gray-50 rounded-lg p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Invoices</h3>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between py-2">
+                <div>
+                  <div className="font-medium text-gray-900">Invoice #12345</div>
+                  <div className="text-sm text-gray-600">Dec 15, 2024</div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-lg font-semibold text-gray-900">$79.00</span>
+                  <button className="p-2 text-gray-400 hover:text-gray-600">
+                    <Download className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Team Settings Component
+  const renderTeamSettings = () => {
+    return (
+      <div>
+        <h2 className="text-xl font-semibold text-gray-900 mb-6">Team Management</h2>
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Team Members</h3>
+              <p className="text-gray-600">Manage your team and permissions</p>
+            </div>
+            <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+              Invite Member
+            </button>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-gray-50 rounded-lg p-4 text-center">
+              <div className="text-2xl font-bold text-gray-900">5</div>
+              <div className="text-sm text-gray-600">Active Members</div>
+            </div>
+            <div className="bg-gray-50 rounded-lg p-4 text-center">
+              <div className="text-2xl font-bold text-gray-900">2</div>
+              <div className="text-sm text-gray-600">Admins</div>
+            </div>
+            <div className="bg-gray-50 rounded-lg p-4 text-center">
+              <div className="text-2xl font-bold text-gray-900">2</div>
+              <div className="text-sm text-gray-600">Pending Invites</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   // Reminder Settings Component
@@ -435,154 +576,5 @@ function SettingsPage() {
     </div>
   );
 }
-
-// Profile Settings Component
-const renderProfileSettings = () => {
-  return (
-    <div>
-      <h2 className="text-xl font-semibold text-gray-900 mb-6">Profile Settings</h2>
-      
-
-      {/* Form Fields */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            First Name *
-                </label>
-                <input
-                  type="text"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-            placeholder="First name"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-
-              <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Last Name *
-                </label>
-          <input
-            type="text"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-            placeholder="Last name"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-                  </div>
-
-                  <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Email
-          </label>
-          <input
-            type="email"
-            value={supabaseUser?.email || "guyattj39@gmail.com"}
-            readOnly
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
-          />
-                  </div>
-
-
-
-
-
-      </div>
-
-      {/* Save Button */}
-      <div className="mt-8 pt-6 border-t border-gray-200">
-        <button 
-          onClick={handleSaveProfile}
-          disabled={savingProfile}
-          className={`px-6 py-2 rounded-lg transition-colors font-medium ${
-            savingProfile 
-              ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
-              : 'bg-blue-600 text-white hover:bg-blue-700'
-          }`}
-        >
-          {savingProfile ? 'Saving...' : 'Save Changes'}
-        </button>
-      </div>
-    </div>
-  );
-};
-
-// Billing Settings Component
-const renderBillingSettings = () => {
-  return (
-    <div>
-      <h2 className="text-xl font-semibold text-gray-900 mb-6">Billing & Plans</h2>
-      <div className="space-y-6">
-        <div className="bg-gray-50 rounded-lg p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Current Plan</h3>
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-2xl font-bold text-gray-900">Professional Plan</div>
-              <div className="text-gray-600">$79/month • 200 contracts</div>
-            </div>
-            <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-              Upgrade Plan
-            </button>
-          </div>
-        </div>
-
-
-        <div className="bg-gray-50 rounded-lg p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Invoices</h3>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between py-2">
-              <div>
-                <div className="font-medium text-gray-900">Invoice #12345</div>
-                <div className="text-sm text-gray-600">Dec 15, 2024</div>
-              </div>
-              <div className="flex items-center gap-4">
-                <span className="text-gray-900">$79.00</span>
-                <button className="text-blue-600 hover:text-blue-700">
-                  <Download className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Team Settings Component
-const renderTeamSettings = () => {
-  return (
-    <div>
-      <h2 className="text-xl font-semibold text-gray-900 mb-6">Team Management</h2>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900">Team Members</h3>
-            <p className="text-gray-600">Manage your team and permissions</p>
-          </div>
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-            Invite Member
-          </button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-gray-50 rounded-lg p-4">
-                <div className="text-2xl font-bold text-gray-900">3</div>
-            <div className="text-sm text-gray-600">Active Members</div>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-4">
-                <div className="text-2xl font-bold text-gray-900">1</div>
-                <div className="text-sm text-gray-600">Admins</div>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-4">
-                <div className="text-2xl font-bold text-gray-900">2</div>
-                <div className="text-sm text-gray-600">Pending Invites</div>
-              </div>
-            </div>
-          </div>
-            </div>
-  );
-};
-
 
 export default SettingsPage;
