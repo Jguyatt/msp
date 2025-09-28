@@ -129,7 +129,9 @@ function SideNav() {
         sidebarCollapsed ? 'w-16' : 'w-64'
       }`}>
         {/* Logo */}
-        <div className="flex items-center justify-between p-4 border-b border-slate-800">
+        <div className={`flex items-center border-b border-slate-800 ${
+          sidebarCollapsed ? 'justify-center p-3' : 'justify-between p-4'
+        }`}>
           {!sidebarCollapsed && <RenluLogo size={32} variant="white" />}
           <button
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
@@ -140,7 +142,7 @@ function SideNav() {
         </div>
 
         {/* Navigation Links */}
-        <nav className="flex-1 p-4">
+        <nav className={`flex-1 ${sidebarCollapsed ? 'p-2' : 'p-4'}`}>
           <ul className="space-y-2">
             {navLinks.map((link) => {
               const Icon = link.icon;
@@ -148,11 +150,16 @@ function SideNav() {
                 <li key={link.name}>
                   <Link
                     to={link.path}
-                    className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                    className={`flex items-center rounded-lg transition-colors ${
+                      sidebarCollapsed 
+                        ? 'justify-center p-3' 
+                        : 'gap-3 px-3 py-2'
+                    } ${
                       isActive(link.path)
                         ? 'bg-slate-800 text-white border-r-2 border-slate-300'
                         : 'text-slate-300 hover:bg-slate-800 hover:text-white'
                     }`}
+                    title={sidebarCollapsed ? link.name : undefined}
                   >
                     <Icon className="h-5 w-5 flex-shrink-0" />
                     {!sidebarCollapsed && (
@@ -166,11 +173,16 @@ function SideNav() {
         </nav>
 
         {/* Bottom Section */}
-        <div className="p-4 border-t border-slate-800">
+        <div className={`border-t border-slate-800 ${sidebarCollapsed ? 'p-2' : 'p-4'}`}>
           {/* Upgrade Button */}
           <Link
             to="/app/plans"
-            className="w-full flex items-center gap-3 px-3 py-2 bg-gradient-to-r from-slate-700 to-slate-600 text-white rounded-lg hover:from-slate-600 hover:to-slate-500 transition-all duration-200 mb-4"
+            className={`w-full flex items-center bg-gradient-to-r from-slate-700 to-slate-600 text-white rounded-lg hover:from-slate-600 hover:to-slate-500 transition-all duration-200 mb-4 ${
+              sidebarCollapsed 
+                ? 'justify-center p-3' 
+                : 'gap-3 px-3 py-2'
+            }`}
+            title={sidebarCollapsed ? 'Upgrade' : undefined}
           >
             <Zap className="h-4 w-4 flex-shrink-0" />
             {!sidebarCollapsed && <span className="text-sm font-medium">Upgrade</span>}
@@ -180,7 +192,12 @@ function SideNav() {
           <div className="relative">
             <button
               onClick={() => setShowProfile(!showProfile)}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition-colors"
+              className={`w-full flex items-center rounded-lg hover:bg-slate-800 transition-colors ${
+                sidebarCollapsed 
+                  ? 'justify-center p-3' 
+                  : 'gap-3 px-3 py-2'
+              }`}
+              title={sidebarCollapsed ? `${user?.firstName || 'User'}` : undefined}
             >
               <div className="w-8 h-8 bg-slate-700 rounded-full flex items-center justify-center flex-shrink-0">
                 <User className="h-4 w-4 text-slate-300" />
@@ -202,7 +219,9 @@ function SideNav() {
 
             {/* Profile Dropdown */}
             {showProfile && (
-              <div className="absolute bottom-full left-0 right-0 mb-2 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+              <div className={`absolute bottom-full mb-2 bg-white border border-gray-200 rounded-lg shadow-lg z-10 ${
+                sidebarCollapsed ? 'left-0 right-0' : 'left-0 right-0'
+              }`}>
                 <div className="p-2">
                   <Link
                     to="/app/settings"
