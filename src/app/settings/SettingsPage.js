@@ -399,46 +399,102 @@ const renderTeamSettings = () => {
 const renderReminderSettings = () => {
   return (
     <div>
-      <h2 className="text-xl font-semibold text-gray-900 mb-6">Reminder Rules</h2>
-      <div className="space-y-6">
-              <div>
-          <label className="block text-sm font-medium text-gray-700 mb-3">
-                  Reminder Intervals
-                </label>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  {[120, 90, 60, 30, 14, 7].map((days) => (
-                    <label key={days} className="flex items-center">
-                      <input
-                        type="checkbox"
-                        defaultChecked={[90, 60, 30].includes(days)}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                      />
-                <span className="ml-2 text-sm text-gray-700">{days} days</span>
-                    </label>
-                  ))}
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">Reminder Rules</h2>
+        <p className="text-gray-600">Configure automated reminders for contract renewals and important dates.</p>
+      </div>
+
+      <div className="space-y-8">
+        {/* Reminder Intervals Section */}
+        <div className="bg-white border border-gray-200 rounded-lg p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+              <Bell className="w-5 h-5 text-blue-600" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Reminder Intervals</h3>
+              <p className="text-sm text-gray-600">Select when to receive contract renewal reminders</p>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+            {[120, 90, 60, 30, 14, 7].map((days) => (
+              <label key={days} className="relative flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
+                <input
+                  type="checkbox"
+                  defaultChecked={[90, 60, 30].includes(days)}
+                  className="sr-only"
+                />
+                <div className={`w-5 h-5 rounded border-2 flex items-center justify-center mr-3 ${
+                  [90, 60, 30].includes(days) 
+                    ? 'bg-blue-600 border-blue-600' 
+                    : 'border-gray-300'
+                }`}>
+                  {[90, 60, 30].includes(days) && (
+                    <CheckCircle className="w-3 h-3 text-white" />
+                  )}
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-gray-900">{days} days</div>
+                  <div className="text-xs text-gray-500">before expiry</div>
+                </div>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        {/* Notification Settings Section */}
+        <div className="bg-white border border-gray-200 rounded-lg p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+              <Bell className="w-5 h-5 text-green-600" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Notification Settings</h3>
+              <p className="text-sm text-gray-600">Choose how you want to receive reminders</p>
+            </div>
+          </div>
+          
+          <div className="space-y-4">
+            <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <Bell className="w-4 h-4 text-blue-600" />
+                </div>
+                <div>
+                  <div className="font-medium text-gray-900">Email Notifications</div>
+                  <div className="text-sm text-gray-600">Receive reminders via email</div>
                 </div>
               </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" defaultChecked className="sr-only peer" />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              </label>
+            </div>
 
-              <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email Template
-                </label>
-                <textarea
-                  rows={6}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Subject: Contract Renewal Reminder
+            <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <Bell className="w-4 h-4 text-purple-600" />
+                </div>
+                <div>
+                  <div className="font-medium text-gray-900">In-App Notifications</div>
+                  <div className="text-sm text-gray-600">Show reminders in the dashboard</div>
+                </div>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" defaultChecked className="sr-only peer" />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              </label>
+            </div>
+          </div>
+        </div>
 
-Dear {{recipient_name}},
-
-This is a reminder that your contract with {{vendor_name}} will expire on {{end_date}}.
-
-We recommend reviewing this contract before it expires to ensure continuity of services.
-
-Please let us know if you have any questions.
-
-Best regards,
-TechFlow Solutions"
-          />
+        {/* Save Button */}
+        <div className="flex justify-end">
+          <button className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+            Save Reminder Settings
+          </button>
         </div>
       </div>
     </div>
