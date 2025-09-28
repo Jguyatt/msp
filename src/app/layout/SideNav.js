@@ -125,17 +125,17 @@ function SideNav() {
   return (
     <>
       {/* Sidebar */}
-      <div className={`fixed left-0 top-0 h-full bg-white border-r border-gray-200 z-50 transition-all duration-300 ${
+      <div className={`fixed left-0 top-0 h-full bg-slate-900 border-r border-slate-800 z-50 transition-all duration-300 ${
         sidebarCollapsed ? 'w-16' : 'w-64'
       }`}>
         {/* Logo */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200">
-          {!sidebarCollapsed && <RenluLogo size={32} variant="default" />}
+        <div className="flex items-center justify-between p-4 border-b border-slate-800">
+          {!sidebarCollapsed && <RenluLogo size={32} variant="white" />}
           <button
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            className="p-2 rounded-lg hover:bg-slate-800 transition-colors"
           >
-            <Menu className="h-5 w-5 text-gray-600" />
+            <Menu className="h-5 w-5 text-slate-300" />
           </button>
         </div>
 
@@ -150,8 +150,8 @@ function SideNav() {
                     to={link.path}
                     className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
                       isActive(link.path)
-                        ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-600'
-                        : 'text-gray-700 hover:bg-gray-50'
+                        ? 'bg-slate-800 text-white border-r-2 border-slate-300'
+                        : 'text-slate-300 hover:bg-slate-800 hover:text-white'
                     }`}
                   >
                     <Icon className="h-5 w-5 flex-shrink-0" />
@@ -166,11 +166,11 @@ function SideNav() {
         </nav>
 
         {/* Bottom Section */}
-        <div className="p-4 border-t border-gray-200">
+        <div className="p-4 border-t border-slate-800">
           {/* Upgrade Button */}
           <Link
             to="/app/plans"
-            className="w-full flex items-center gap-3 px-3 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-200 mb-4"
+            className="w-full flex items-center gap-3 px-3 py-2 bg-gradient-to-r from-slate-700 to-slate-600 text-white rounded-lg hover:from-slate-600 hover:to-slate-500 transition-all duration-200 mb-4"
           >
             <Zap className="h-4 w-4 flex-shrink-0" />
             {!sidebarCollapsed && <span className="text-sm font-medium">Upgrade</span>}
@@ -180,22 +180,22 @@ function SideNav() {
           <div className="relative">
             <button
               onClick={() => setShowProfile(!showProfile)}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition-colors"
             >
-              <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
-                <User className="h-4 w-4 text-gray-600" />
+              <div className="w-8 h-8 bg-slate-700 rounded-full flex items-center justify-center flex-shrink-0">
+                <User className="h-4 w-4 text-slate-300" />
               </div>
               {!sidebarCollapsed && (
                 <>
                   <div className="flex-1 text-left">
-                    <div className="text-sm font-medium text-gray-900">
+                    <div className="text-sm font-medium text-slate-200">
                       {user?.firstName || 'User'}
                     </div>
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-slate-400">
                       {user?.emailAddresses?.[0]?.emailAddress || 'user@example.com'}
                     </div>
                   </div>
-                  <ChevronDown className="h-4 w-4 text-gray-400" />
+                  <ChevronDown className="h-4 w-4 text-slate-400" />
                 </>
               )}
             </button>
@@ -230,13 +230,13 @@ function SideNav() {
       </div>
 
       {/* Top Bar */}
-      <div className="fixed top-0 h-16 bg-white border-b border-gray-200 z-40 transition-all duration-300" 
+      <div className="fixed top-0 h-16 bg-slate-50 border-b border-slate-200 z-40 transition-all duration-300" 
            style={{ left: sidebarCollapsed ? '4rem' : '16rem', right: 0 }}>
         <div className="flex items-center justify-between h-full px-6">
           {/* Search */}
           <div className="flex-1 max-w-md">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
               <input
                 ref={searchInputRef}
                 type="text"
@@ -244,7 +244,7 @@ function SideNav() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleSearch(e)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent bg-white"
               />
             </div>
           </div>
@@ -255,7 +255,7 @@ function SideNav() {
             <div className="relative">
               <button
                 onClick={() => setShowNotifications(!showNotifications)}
-                className="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                className="relative p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
               >
                 <Bell className="h-5 w-5" />
                 {notifications.length > 0 && (
@@ -298,7 +298,7 @@ function SideNav() {
             </div>
 
             {/* Status Indicator */}
-            <div className="flex items-center gap-2 text-sm text-gray-600">
+            <div className="flex items-center gap-2 text-sm text-slate-600">
               <CheckCircle className="h-4 w-4 text-green-500" />
               <span>All Good</span>
             </div>

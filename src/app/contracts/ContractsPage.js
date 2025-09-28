@@ -225,16 +225,16 @@ function ContractsPage({ isCompact = false }) {
   }
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="bg-slate-50 min-h-screen">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
         {/* Header */}
         <div className="mb-10">
           <div className="flex items-start justify-between mb-8">
             <div className="flex-1">
-              <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
+              <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
                 {isCompact ? 'Recent Contracts' : 'Contract Management'}
               </h1>
-              <p className="mt-3 text-lg text-gray-600 leading-relaxed">
+              <p className="mt-3 text-lg text-slate-600 leading-relaxed">
                 {isCompact 
                   ? 'Latest contract activity and renewals'
                   : 'Comprehensive contract tracking, renewal management, and automated reminders'
@@ -243,13 +243,13 @@ function ContractsPage({ isCompact = false }) {
             </div>
                 {!isCompact && (
                   <div className="flex items-center gap-3 ml-8">
-                    <button className="inline-flex items-center gap-2 px-4 py-2.5 bg-white text-gray-700 rounded-lg border border-gray-200 hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 font-medium">
+                    <button className="inline-flex items-center gap-2 px-4 py-2.5 bg-white text-slate-700 rounded-lg border border-slate-200 hover:bg-slate-50 hover:border-slate-300 transition-all duration-200 font-medium">
                       <Filter className="h-4 w-4" />
                       Filter
                     </button>
                     <button 
                       onClick={handleExportContracts}
-                      className="inline-flex items-center gap-2 px-4 py-2.5 bg-white text-gray-700 rounded-lg border border-gray-200 hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 font-medium"
+                      className="inline-flex items-center gap-2 px-4 py-2.5 bg-white text-slate-700 rounded-lg border border-slate-200 hover:bg-slate-50 hover:border-slate-300 transition-all duration-200 font-medium"
                     >
                       <Download className="h-4 w-4" />
                       Export
@@ -265,7 +265,7 @@ function ContractsPage({ isCompact = false }) {
                     )}
                     <button
                       onClick={handleAddContract}
-                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 font-medium shadow-sm hover:shadow-md"
+                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-700 text-white rounded-lg hover:bg-slate-800 transition-all duration-200 font-medium shadow-sm hover:shadow-md"
                     >
                       <Plus className="h-4 w-4" />
                       Add Contract
@@ -277,22 +277,22 @@ function ContractsPage({ isCompact = false }) {
           {/* Stats Cards */}
           {!isCompact && (
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
-              <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
+              <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 mb-1">Total Contracts</p>
-                    <p className="text-3xl font-bold text-gray-900">{contracts.length}</p>
+                    <p className="text-sm font-medium text-slate-600 mb-1">Total Contracts</p>
+                    <p className="text-3xl font-bold text-slate-900">{contracts.length}</p>
                   </div>
-                  <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center">
-                    <CheckCircle2 className="h-6 w-6 text-blue-600" />
+                  <div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center">
+                    <CheckCircle2 className="h-6 w-6 text-slate-600" />
                   </div>
                 </div>
               </div>
               
-              <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
+              <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 mb-1">Expiring Soon</p>
+                    <p className="text-sm font-medium text-slate-600 mb-1">Expiring Soon</p>
                     <p className="text-3xl font-bold text-red-600">{contracts.filter(c => c.daysUntil <= 30).length}</p>
                   </div>
                   <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center">
@@ -301,10 +301,10 @@ function ContractsPage({ isCompact = false }) {
                 </div>
               </div>
               
-              <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
+              <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 mb-1">This Month</p>
+                    <p className="text-sm font-medium text-slate-600 mb-1">This Month</p>
                     <p className="text-3xl font-bold text-orange-600">{contracts.filter(c => c.daysUntil <= 60).length}</p>
                   </div>
                   <div className="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center">
@@ -313,10 +313,10 @@ function ContractsPage({ isCompact = false }) {
                 </div>
               </div>
               
-              <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
+              <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 mb-1">Renewal Rate</p>
+                    <p className="text-sm font-medium text-slate-600 mb-1">Renewal Rate</p>
                     <p className="text-3xl font-bold text-green-600">94%</p>
                   </div>
                   <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center">
@@ -331,25 +331,25 @@ function ContractsPage({ isCompact = false }) {
           <div className="flex items-center gap-4 mb-8">
             <div className="flex-1 max-w-lg">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
                 <input
                   type="text"
                   value={searchTerm}
                   onChange={handleSearchChange}
                   placeholder="Search contracts, vendors, or contract names..."
-                  className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-500 transition-all duration-200"
+                  className="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent text-slate-900 placeholder-slate-500 transition-all duration-200"
                 />
               </div>
             </div>
             {!isCompact && (
               <div className="flex items-center gap-3">
-                <button className="px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all duration-200">
+                <button className="px-4 py-2.5 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:border-slate-300 transition-all duration-200">
                   All Status
                 </button>
-                <button className="px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all duration-200">
+                <button className="px-4 py-2.5 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:border-slate-300 transition-all duration-200">
                   All Vendors
                 </button>
-                <button className="px-3 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all duration-200">
+                <button className="px-3 py-2.5 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:border-slate-300 transition-all duration-200">
                   <MoreHorizontal className="h-4 w-4" />
                 </button>
               </div>
