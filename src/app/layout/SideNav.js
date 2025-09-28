@@ -170,10 +170,13 @@ function SideNav() {
         {/* Bottom Section */}
         <div className="p-4 border-t border-gray-200">
           {/* Upgrade Button */}
-          <button className="w-full flex items-center gap-3 px-3 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-200 mb-4">
+          <Link
+            to="/app/plans"
+            className="w-full flex items-center gap-3 px-3 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-200 mb-4"
+          >
             <Zap className="h-4 w-4 flex-shrink-0" />
             {!sidebarCollapsed && <span className="text-sm font-medium">Upgrade</span>}
-          </button>
+          </Link>
 
           {/* User Profile */}
           <div className="relative">
