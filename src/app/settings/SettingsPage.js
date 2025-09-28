@@ -13,6 +13,12 @@ function SettingsPage() {
   const [cancelling, setCancelling] = useState(false);
   const [invoices, setInvoices] = useState([]);
   const [activeTab, setActiveTab] = useState('profile');
+  
+  // Reminder settings state
+  const [reminderIntervals, setReminderIntervals] = useState([90, 60, 30]);
+  const [emailNotifications, setEmailNotifications] = useState(true);
+  const [inAppNotifications, setInAppNotifications] = useState(true);
+  const [savingReminders, setSavingReminders] = useState(false);
 
   // Sidebar navigation items
   const sidebarItems = [
@@ -143,6 +149,44 @@ function SettingsPage() {
       window.open(invoice.url, '_blank');
     } else {
       alert('Invoice download not available. Please contact support.');
+    }
+  };
+
+  // Reminder settings handlers
+  const handleReminderIntervalChange = (days) => {
+    setReminderIntervals(prev => {
+      if (prev.includes(days)) {
+        return prev.filter(d => d !== days);
+      } else {
+        return [...prev, days].sort((a, b) => b - a);
+      }
+    });
+  };
+
+  const handleSaveReminderSettings = async () => {
+    setSavingReminders(true);
+    try {
+      // Here you would typically save to your backend/database
+      // For now, we'll just simulate a save operation
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // You could add API call here:
+      // await fetch('/api/reminder-settings', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({
+      //     intervals: reminderIntervals,
+      //     emailNotifications,
+      //     inAppNotifications
+      //   })
+      // });
+      
+      alert('Reminder settings saved successfully!');
+    } catch (error) {
+      console.error('Error saving reminder settings:', error);
+      alert('Failed to save reminder settings. Please try again.');
+    } finally {
+      setSavingReminders(false);
     }
   };
 
@@ -422,15 +466,16 @@ const renderReminderSettings = () => {
               <label key={days} className="relative flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
                 <input
                   type="checkbox"
-                  defaultChecked={[90, 60, 30].includes(days)}
+                  checked={reminderIntervals.includes(days)}
+                  onChange={() => handleReminderIntervalChange(days)}
                   className="sr-only"
                 />
                 <div className={`w-5 h-5 rounded border-2 flex items-center justify-center mr-3 ${
-                  [90, 60, 30].includes(days) 
+                  reminderIntervals.includes(days) 
                     ? 'bg-blue-600 border-blue-600' 
                     : 'border-gray-300'
                 }`}>
-                  {[90, 60, 30].includes(days) && (
+                  {reminderIntervals.includes(days) && (
                     <CheckCircle className="w-3 h-3 text-white" />
                   )}
                 </div>
@@ -467,8 +512,19 @@ const renderReminderSettings = () => {
                 </div>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" defaultChecked className="sr-only peer" />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                <input 
+                  type="checkbox" 
+                  checked={emailNotifications}
+                  onChange={(e) => setEmailNotifications(e.target.checked)}
+                  className="sr-only peer" 
+                />
+                <div className={`w-11 h-6 rounded-full peer transition-colors ${
+                  emailNotifications ? 'bg-blue-600' : 'bg-gray-200'
+                }`}>
+                  <div className={`absolute top-[2px] left-[2px] bg-white border border-gray-300 rounded-full h-5 w-5 transition-transform ${
+                    emailNotifications ? 'translate-x-full' : 'translate-x-0'
+                  }`}></div>
+                </div>
               </label>
             </div>
 
@@ -483,8 +539,19 @@ const renderReminderSettings = () => {
                 </div>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" defaultChecked className="sr-only peer" />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                <input 
+                  type="checkbox" 
+                  checked={inAppNotifications}
+                  onChange={(e) => setInAppNotifications(e.target.checked)}
+                  className="sr-only peer" 
+                />
+                <div className={`w-11 h-6 rounded-full peer transition-colors ${
+                  inAppNotifications ? 'bg-blue-600' : 'bg-gray-200'
+                }`}>
+                  <div className={`absolute top-[2px] left-[2px] bg-white border border-gray-300 rounded-full h-5 w-5 transition-transform ${
+                    inAppNotifications ? 'translate-x-full' : 'translate-x-0'
+                  }`}></div>
+                </div>
               </label>
             </div>
           </div>
@@ -492,8 +559,16 @@ const renderReminderSettings = () => {
 
         {/* Save Button */}
         <div className="flex justify-end">
-          <button className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
-            Save Reminder Settings
+          <button 
+            onClick={handleSaveReminderSettings}
+            disabled={savingReminders}
+            className={`px-6 py-3 rounded-lg transition-colors font-medium ${
+              savingReminders 
+                ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
+                : 'bg-blue-600 text-white hover:bg-blue-700'
+            }`}
+          >
+            {savingReminders ? 'Saving...' : 'Save Reminder Settings'}
           </button>
         </div>
       </div>
