@@ -334,6 +334,84 @@ function SettingsPage() {
 
   // Team Settings Component
   const renderTeamSettings = () => {
+    // Mock team data - in real app, this would come from your backend
+    const teamMembers = [
+      {
+        id: 1,
+        name: 'Jacob Guyatt',
+        email: 'guyattj39@gmail.com',
+        role: 'Owner',
+        status: 'active',
+        avatar: 'JG',
+        joinedDate: '2024-01-15'
+      },
+      {
+        id: 2,
+        name: 'Sarah Johnson',
+        email: 'sarah.johnson@company.com',
+        role: 'Admin',
+        status: 'active',
+        avatar: 'SJ',
+        joinedDate: '2024-02-01'
+      },
+      {
+        id: 3,
+        name: 'Mike Chen',
+        email: 'mike.chen@company.com',
+        role: 'Member',
+        status: 'active',
+        avatar: 'MC',
+        joinedDate: '2024-02-15'
+      },
+      {
+        id: 4,
+        name: 'Emily Davis',
+        email: 'emily.davis@company.com',
+        role: 'Member',
+        status: 'pending',
+        avatar: 'ED',
+        joinedDate: null
+      },
+      {
+        id: 5,
+        name: 'Alex Rodriguez',
+        email: 'alex.rodriguez@company.com',
+        role: 'Member',
+        status: 'pending',
+        avatar: 'AR',
+        joinedDate: null
+      }
+    ];
+
+    const activeMembers = teamMembers.filter(member => member.status === 'active').length;
+    const admins = teamMembers.filter(member => member.role === 'Admin' || member.role === 'Owner').length;
+    const pendingInvites = teamMembers.filter(member => member.status === 'pending').length;
+
+    const handleInviteMember = () => {
+      const email = prompt('Enter email address to invite:');
+      if (email && email.includes('@')) {
+        // In real app, this would call your backend API
+        alert(`Invitation sent to ${email}`);
+      } else if (email) {
+        alert('Please enter a valid email address');
+      }
+    };
+
+    const handleRemoveMember = (memberId, memberName) => {
+      if (window.confirm(`Are you sure you want to remove ${memberName} from the team?`)) {
+        // In real app, this would call your backend API
+        alert(`${memberName} has been removed from the team`);
+      }
+    };
+
+    const handleChangeRole = (memberId, memberName, currentRole) => {
+      const newRole = prompt(`Change role for ${memberName} (current: ${currentRole}):\n\nEnter: Admin, Member, or Owner`);
+      if (newRole && ['Admin', 'Member', 'Owner'].includes(newRole)) {
+        // In real app, this would call your backend API
+        alert(`${memberName}'s role has been changed to ${newRole}`);
+      }
+    };
+
     return (
       <div>
         <h2 className="text-xl font-semibold text-gray-900 mb-6">Team Management</h2>
@@ -343,23 +421,112 @@ function SettingsPage() {
               <h3 className="text-lg font-semibold text-gray-900">Team Members</h3>
               <p className="text-gray-600">Manage your team and permissions</p>
             </div>
-            <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+            <button 
+              onClick={handleInviteMember}
+              className="px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-800 transition-colors"
+            >
               Invite Member
             </button>
           </div>
           
+          {/* Team Stats */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-gray-50 rounded-lg p-4 text-center">
-              <div className="text-2xl font-bold text-gray-900">5</div>
-              <div className="text-sm text-gray-600">Active Members</div>
+            <div className="bg-slate-50 rounded-lg p-4 text-center">
+              <div className="text-2xl font-bold text-slate-900">{activeMembers}</div>
+              <div className="text-sm text-slate-600">Active Members</div>
             </div>
-            <div className="bg-gray-50 rounded-lg p-4 text-center">
-              <div className="text-2xl font-bold text-gray-900">2</div>
-              <div className="text-sm text-gray-600">Admins</div>
+            <div className="bg-slate-50 rounded-lg p-4 text-center">
+              <div className="text-2xl font-bold text-slate-900">{admins}</div>
+              <div className="text-sm text-slate-600">Admins</div>
             </div>
-            <div className="bg-gray-50 rounded-lg p-4 text-center">
-              <div className="text-2xl font-bold text-gray-900">2</div>
-              <div className="text-sm text-gray-600">Pending Invites</div>
+            <div className="bg-slate-50 rounded-lg p-4 text-center">
+              <div className="text-2xl font-bold text-slate-900">{pendingInvites}</div>
+              <div className="text-sm text-slate-600">Pending Invites</div>
+            </div>
+          </div>
+
+          {/* Team Members List */}
+          <div className="bg-white border border-slate-200 rounded-lg">
+            <div className="px-6 py-4 border-b border-slate-200">
+              <h4 className="text-lg font-semibold text-slate-900">All Team Members</h4>
+            </div>
+            <div className="divide-y divide-slate-200">
+              {teamMembers.map((member) => (
+                <div key={member.id} className="px-6 py-4 flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center">
+                      <span className="text-sm font-medium text-slate-700">{member.avatar}</span>
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h5 className="text-sm font-medium text-slate-900">{member.name}</h5>
+                        {member.status === 'pending' && (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                            Pending
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm text-slate-600">{member.email}</p>
+                      {member.joinedDate && (
+                        <p className="text-xs text-slate-500">Joined {new Date(member.joinedDate).toLocaleDateString()}</p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <select 
+                      value={member.role}
+                      onChange={(e) => handleChangeRole(member.id, member.name, member.role)}
+                      className="text-sm border border-slate-300 rounded-lg px-3 py-1 focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                    >
+                      <option value="Member">Member</option>
+                      <option value="Admin">Admin</option>
+                      <option value="Owner">Owner</option>
+                    </select>
+                    {member.role !== 'Owner' && (
+                      <button
+                        onClick={() => handleRemoveMember(member.id, member.name)}
+                        className="text-red-600 hover:text-red-800 text-sm font-medium"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Role Permissions */}
+          <div className="bg-white border border-slate-200 rounded-lg p-6">
+            <h4 className="text-lg font-semibold text-slate-900 mb-4">Role Permissions</h4>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="border border-slate-200 rounded-lg p-4">
+                <h5 className="font-medium text-slate-900 mb-2">Owner</h5>
+                <ul className="text-sm text-slate-600 space-y-1">
+                  <li>• Full system access</li>
+                  <li>• Manage team members</li>
+                  <li>• Billing and settings</li>
+                  <li>• Delete organization</li>
+                </ul>
+              </div>
+              <div className="border border-slate-200 rounded-lg p-4">
+                <h5 className="font-medium text-slate-900 mb-2">Admin</h5>
+                <ul className="text-sm text-slate-600 space-y-1">
+                  <li>• Manage contracts</li>
+                  <li>• Invite team members</li>
+                  <li>• View reports</li>
+                  <li>• Manage reminders</li>
+                </ul>
+              </div>
+              <div className="border border-slate-200 rounded-lg p-4">
+                <h5 className="font-medium text-slate-900 mb-2">Member</h5>
+                <ul className="text-sm text-slate-600 space-y-1">
+                  <li>• View contracts</li>
+                  <li>• Add contracts</li>
+                  <li>• View reports</li>
+                  <li>• Basic settings</li>
+                </ul>
+              </div>
             </div>
           </div>
         </div>
