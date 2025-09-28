@@ -19,6 +19,11 @@ function SettingsPage() {
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [inAppNotifications, setInAppNotifications] = useState(true);
   const [savingReminders, setSavingReminders] = useState(false);
+  
+  // Profile settings state
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [savingProfile, setSavingProfile] = useState(false);
 
   // Sidebar navigation items
   const sidebarItems = [
@@ -50,6 +55,10 @@ function SettingsPage() {
           setCompanyName(supabaseUser.companies.name || '');
           setDomain(supabaseUser.companies.domain || '');
         }
+        
+        // Load profile data
+        setFirstName(supabaseUser.first_name || '');
+        setLastName(supabaseUser.last_name || '');
         
         // TODO: Fetch real invoices from Stripe
         // For now, show mock data based on subscription
@@ -184,6 +193,36 @@ function SettingsPage() {
       alert('Failed to save reminder settings. Please try again.');
     } finally {
       setSavingReminders(false);
+    }
+  };
+
+  const handleSaveProfile = async () => {
+    setSavingProfile(true);
+    try {
+      // Save profile data to Supabase
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabaseUrl = process.env.REACT_APP_SUPABASE_URL || 'https://skyexizhdrrqunmllkza.supabase.co';
+      const supabaseKey = process.env.REACT_APP_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNreWV4aXpoZHJycXVubWxsa3phIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg4MzYxODEsImV4cCI6MjA3NDQxMjE4MX0.MKs-c_vUxw-QiEqwqhgBt0KptbIqh8mXspPlocsdGZQ';
+      const supabase = createClient(supabaseUrl, supabaseKey);
+
+      const { error } = await supabase
+        .from('users')
+        .update({
+          first_name: firstName,
+          last_name: lastName
+        })
+        .eq('id', supabaseUser.id);
+
+      if (error) {
+        throw error;
+      }
+
+      alert('Profile saved successfully!');
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      alert('Failed to save profile. Please try again.');
+    } finally {
+      setSavingProfile(false);
     }
   };
 
@@ -412,6 +451,8 @@ const renderProfileSettings = () => {
                 </label>
                 <input
                   type="text"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
             placeholder="First name"
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
@@ -423,6 +464,8 @@ const renderProfileSettings = () => {
                 </label>
           <input
             type="text"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
             placeholder="Last name"
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
@@ -434,28 +477,13 @@ const renderProfileSettings = () => {
           </label>
           <input
             type="email"
-            value="guyattj39@gmail.com"
+            value={supabaseUser?.email || "guyattj39@gmail.com"}
             readOnly
             className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
           />
                   </div>
 
 
-              <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Gender
-          </label>
-          <div className="flex gap-4">
-            <label className="flex items-center">
-              <input type="radio" name="gender" value="male" defaultChecked className="mr-2" />
-              <span className="text-sm text-gray-700">Male</span>
-            </label>
-            <label className="flex items-center">
-              <input type="radio" name="gender" value="female" className="mr-2" />
-              <span className="text-sm text-gray-700">Female</span>
-            </label>
-          </div>
-        </div>
 
 
 
@@ -463,8 +491,16 @@ const renderProfileSettings = () => {
 
       {/* Save Button */}
       <div className="mt-8 pt-6 border-t border-gray-200">
-        <button className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-          Save Changes
+        <button 
+          onClick={handleSaveProfile}
+          disabled={savingProfile}
+          className={`px-6 py-2 rounded-lg transition-colors font-medium ${
+            savingProfile 
+              ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
+              : 'bg-blue-600 text-white hover:bg-blue-700'
+          }`}
+        >
+          {savingProfile ? 'Saving...' : 'Save Changes'}
         </button>
       </div>
     </div>
