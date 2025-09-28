@@ -15,6 +15,7 @@
     font-family: 'Inter', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
   
   body {
@@ -22,11 +23,34 @@
     font-family: 'Inter', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    font-variant-ligatures: common-ligatures;
+    letter-spacing: -0.01em;
   }
   
-  /* Ensure consistent font rendering */
+  /* Enhanced typography for better readability */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    line-height: 1.2;
+  }
+  
+  /* Ensure consistent font rendering across all elements */
   input, button, select, textarea {
     font-family: inherit;
+    font-feature-settings: inherit;
+  }
+  
+  /* Professional button and form styling */
+  button {
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+  
+  /* Code and monospace elements */
+  code, pre {
+    font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', 'Source Code Pro', monospace;
   }
 }
