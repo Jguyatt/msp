@@ -26,18 +26,19 @@ export const contractService = {
   // Get contracts for current user (by email)
   async getContractsForUser(userEmail) {
     try {
-      // First get the user to find their company
-      const { data: user, error: userError } = await supabase
-        .from('users')
-        .select('company_id')
-        .eq('email', userEmail)
-        .single();
+      const response = await fetch(`/api/contracts?userEmail=${encodeURIComponent(userEmail)}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
 
-      if (userError) throw userError;
-      if (!user) throw new Error('User not found');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to fetch contracts');
+      }
 
-      // Then get contracts for that company
-      return await this.getContracts(user.company_id);
+      return await response.json();
     } catch (error) {
       console.error('Error getting contracts for user:', error);
       throw error;
@@ -70,31 +71,23 @@ export const contractService = {
   // Create a new contract
   async createContract(contractData, userEmail) {
     try {
-      // First get the user to find their company
-      const { data: user, error: userError } = await supabase
-        .from('users')
-        .select('company_id, id')
-        .eq('email', userEmail)
-        .single();
+      const response = await fetch('/api/contracts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contractData,
+          userEmail
+        })
+      });
 
-      if (userError) throw userError;
-      if (!user) throw new Error('User not found');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create contract');
+      }
 
-      // Add company_id and created_by to contract data
-      const contractWithCompany = {
-        ...contractData,
-        company_id: user.company_id,
-        created_by: user.id
-      };
-
-      const { data, error } = await supabase
-        .from('contracts')
-        .insert([contractWithCompany])
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
+      return await response.json();
     } catch (error) {
       console.error('Error creating contract:', error);
       throw error;
