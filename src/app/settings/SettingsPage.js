@@ -281,7 +281,7 @@ function SettingsPage() {
             className={`px-6 py-2 rounded-lg transition-colors font-medium ${
               savingProfile 
                 ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
-                : 'bg-blue-600 text-white hover:bg-blue-700'
+                : 'bg-slate-700 text-white hover:bg-slate-800'
             }`}
           >
             {savingProfile ? 'Saving...' : 'Save Changes'}
@@ -304,7 +304,7 @@ function SettingsPage() {
                 <div className="text-2xl font-bold text-gray-900">Professional Plan</div>
                 <div className="text-gray-600">$79/month • 200 contracts</div>
               </div>
-              <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+              <button className="px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-blue-700 transition-colors">
                 Upgrade Plan
               </button>
             </div>
@@ -552,7 +552,7 @@ function SettingsPage() {
                   />
                   <div className={`w-5 h-5 rounded border-2 flex items-center justify-center mr-3 ${
                     reminderIntervals.includes(days) 
-                      ? 'bg-blue-600 border-blue-600' 
+                      ? 'bg-slate-700 border-blue-600' 
                       : 'border-gray-300'
                   }`}>
                     {reminderIntervals.includes(days) && (
@@ -599,7 +599,7 @@ function SettingsPage() {
                     className="sr-only peer" 
                   />
                   <div className={`w-11 h-6 rounded-full peer transition-colors ${
-                    emailNotifications ? 'bg-blue-600' : 'bg-gray-200'
+                    emailNotifications ? 'bg-slate-700' : 'bg-gray-200'
                   }`}>
                     <div className={`absolute top-[2px] left-[2px] bg-white border border-gray-300 rounded-full h-5 w-5 transition-transform ${
                       emailNotifications ? 'translate-x-full' : 'translate-x-0'
@@ -626,7 +626,7 @@ function SettingsPage() {
                     className="sr-only peer" 
                   />
                   <div className={`w-11 h-6 rounded-full peer transition-colors ${
-                    inAppNotifications ? 'bg-blue-600' : 'bg-gray-200'
+                    inAppNotifications ? 'bg-slate-700' : 'bg-gray-200'
                   }`}>
                     <div className={`absolute top-[2px] left-[2px] bg-white border border-gray-300 rounded-full h-5 w-5 transition-transform ${
                       inAppNotifications ? 'translate-x-full' : 'translate-x-0'
@@ -645,7 +645,7 @@ function SettingsPage() {
               className={`px-6 py-3 rounded-lg transition-colors font-medium ${
                 savingReminders 
                   ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
-                  : 'bg-blue-600 text-white hover:bg-blue-700'
+                  : 'bg-slate-700 text-white hover:bg-slate-800'
               }`}
             >
               {savingReminders ? 'Saving...' : 'Save Reminder Settings'}

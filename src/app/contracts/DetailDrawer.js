@@ -69,7 +69,7 @@ function DetailDrawer({ contract, onClose, onContractUpdate }) {
                 <div className="bg-white border-b border-slate-200 px-6 py-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
+                      <div className="w-12 h-12 bg-slate-700 rounded-full flex items-center justify-center">
                         <span className="text-white font-bold text-lg">
                           {contract.vendor.charAt(0)}
                         </span>
@@ -187,7 +187,7 @@ function DetailDrawer({ contract, onClose, onContractUpdate }) {
                       <div className="flex gap-3">
                         <button
                           onClick={() => setShowEditModal(true)}
-                          className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                          className="flex-1 bg-slate-700 text-white px-4 py-2 rounded-lg hover:bg-slate-800 transition-colors"
                         >
                           Edit Contract
                         </button>

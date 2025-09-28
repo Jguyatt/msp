@@ -262,7 +262,7 @@ ConnectWise,ConnectWise Manage,2024-03-01,2025-03-01,3600.00,admin@company.com`;
                 onClick={() => setUploadMode('csv')}
                 className={`px-6 py-3 rounded-lg text-sm font-medium transition-all ${
                   uploadMode === 'csv'
-                    ? 'bg-blue-600 text-white shadow-sm'
+                    ? 'bg-slate-700 text-white shadow-sm'
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
@@ -272,7 +272,7 @@ ConnectWise,ConnectWise Manage,2024-03-01,2025-03-01,3600.00,admin@company.com`;
                 onClick={() => setUploadMode('pdf')}
                 className={`px-6 py-3 rounded-lg text-sm font-medium transition-all ${
                   uploadMode === 'pdf'
-                    ? 'bg-blue-600 text-white shadow-sm'
+                    ? 'bg-slate-700 text-white shadow-sm'
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
@@ -316,7 +316,7 @@ ConnectWise,ConnectWise Manage,2024-03-01,2025-03-01,3600.00,admin@company.com`;
                 {/* Step 1: Download Template */}
                 <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
                   <div className="flex items-center mb-6">
-                    <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-semibold text-sm mr-4">1</div>
+                    <div className="w-8 h-8 bg-slate-700 text-white rounded-full flex items-center justify-center font-semibold text-sm mr-4">1</div>
                     <div>
                       <h2 className="text-lg font-semibold text-gray-900">Download Template</h2>
                       <p className="text-gray-600">Get the CSV template with proper formatting</p>
@@ -334,7 +334,7 @@ ConnectWise,ConnectWise Manage,2024-03-01,2025-03-01,3600.00,admin@company.com`;
                       </div>
                       <button
                         onClick={handleDownloadTemplate}
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-800 transition-colors"
                       >
                         <Download className="h-4 w-4" />
                         Download
@@ -346,7 +346,7 @@ ConnectWise,ConnectWise Manage,2024-03-01,2025-03-01,3600.00,admin@company.com`;
                 {/* Step 2: Upload CSV */}
                 <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
                   <div className="flex items-center mb-6">
-                    <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-semibold text-sm mr-4">2</div>
+                    <div className="w-8 h-8 bg-slate-700 text-white rounded-full flex items-center justify-center font-semibold text-sm mr-4">2</div>
                     <div>
                       <h2 className="text-lg font-semibold text-gray-900">Upload Your Data</h2>
                       <p className="text-gray-600">Drag & drop or select your CSV file</p>
@@ -423,7 +423,7 @@ ConnectWise,ConnectWise Manage,2024-03-01,2025-03-01,3600.00,admin@company.com`;
                     <button
                       type="submit"
                       disabled={!file || uploading}
-                      className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-slate-700 text-white rounded-lg hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {uploading ? (
                         <>
@@ -445,7 +445,7 @@ ConnectWise,ConnectWise Manage,2024-03-01,2025-03-01,3600.00,admin@company.com`;
                 {/* PDF Upload Section */}
                 <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
                   <div className="flex items-center mb-6">
-                    <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-semibold text-sm mr-4">1</div>
+                    <div className="w-8 h-8 bg-slate-700 text-white rounded-full flex items-center justify-center font-semibold text-sm mr-4">1</div>
                     <div>
                       <h2 className="text-lg font-semibold text-gray-900">Upload PDF Contracts</h2>
                       <p className="text-gray-600">Select one or more PDF contract files</p>
@@ -506,7 +506,7 @@ ConnectWise,ConnectWise Manage,2024-03-01,2025-03-01,3600.00,admin@company.com`;
                 {pdfFiles.length > 0 && (
                   <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
                     <div className="flex items-center mb-6">
-                      <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-semibold text-sm mr-4">2</div>
+                      <div className="w-8 h-8 bg-slate-700 text-white rounded-full flex items-center justify-center font-semibold text-sm mr-4">2</div>
                       <div>
                         <h2 className="text-lg font-semibold text-gray-900">Contract Details</h2>
                         <p className="text-gray-600">Fill in details for each uploaded PDF</p>
@@ -609,7 +609,7 @@ ConnectWise,ConnectWise Manage,2024-03-01,2025-03-01,3600.00,admin@company.com`;
                             <div className="mt-4 flex justify-end">
                               <button
                                 onClick={() => uploadPdfFile(pdfFile.id)}
-                                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                                className="inline-flex items-center gap-2 px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-800 transition-colors"
                               >
                                 <UploadCloud className="h-4 w-4" />
                                 Upload Contract
@@ -636,7 +636,7 @@ ConnectWise,ConnectWise Manage,2024-03-01,2025-03-01,3600.00,admin@company.com`;
               {uploadMode === 'csv' ? (
                 <div className="space-y-3">
                   <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                    <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-semibold flex-shrink-0 mt-0.5">1</div>
+                    <div className="w-6 h-6 bg-slate-700 text-white rounded-full flex items-center justify-center text-xs font-semibold flex-shrink-0 mt-0.5">1</div>
                     <div>
                       <p className="font-medium text-gray-900">Vendor</p>
                       <p className="text-sm text-gray-600">Company name (required)</p>
@@ -644,7 +644,7 @@ ConnectWise,ConnectWise Manage,2024-03-01,2025-03-01,3600.00,admin@company.com`;
                   </div>
                   
                   <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                    <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-semibold flex-shrink-0 mt-0.5">2</div>
+                    <div className="w-6 h-6 bg-slate-700 text-white rounded-full flex items-center justify-center text-xs font-semibold flex-shrink-0 mt-0.5">2</div>
                     <div>
                       <p className="font-medium text-gray-900">Contract Name</p>
                       <p className="text-sm text-gray-600">Contract identifier (required)</p>
@@ -652,7 +652,7 @@ ConnectWise,ConnectWise Manage,2024-03-01,2025-03-01,3600.00,admin@company.com`;
                   </div>
                   
                   <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                    <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-semibold flex-shrink-0 mt-0.5">3</div>
+                    <div className="w-6 h-6 bg-slate-700 text-white rounded-full flex items-center justify-center text-xs font-semibold flex-shrink-0 mt-0.5">3</div>
                     <div>
                       <p className="font-medium text-gray-900">Start Date</p>
                       <p className="text-sm text-gray-600">YYYY-MM-DD format (required)</p>
@@ -660,7 +660,7 @@ ConnectWise,ConnectWise Manage,2024-03-01,2025-03-01,3600.00,admin@company.com`;
                   </div>
                   
                   <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                    <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-semibold flex-shrink-0 mt-0.5">4</div>
+                    <div className="w-6 h-6 bg-slate-700 text-white rounded-full flex items-center justify-center text-xs font-semibold flex-shrink-0 mt-0.5">4</div>
                     <div>
                       <p className="font-medium text-gray-900">End Date</p>
                       <p className="text-sm text-gray-600">YYYY-MM-DD format (required)</p>
@@ -668,7 +668,7 @@ ConnectWise,ConnectWise Manage,2024-03-01,2025-03-01,3600.00,admin@company.com`;
                   </div>
                   
                   <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                    <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-semibold flex-shrink-0 mt-0.5">5</div>
+                    <div className="w-6 h-6 bg-slate-700 text-white rounded-full flex items-center justify-center text-xs font-semibold flex-shrink-0 mt-0.5">5</div>
                     <div>
                       <p className="font-medium text-gray-900">Value (USD)</p>
                       <p className="text-sm text-gray-600">Contract value in USD (required)</p>
@@ -676,7 +676,7 @@ ConnectWise,ConnectWise Manage,2024-03-01,2025-03-01,3600.00,admin@company.com`;
                   </div>
                   
                   <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                    <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-semibold flex-shrink-0 mt-0.5">6</div>
+                    <div className="w-6 h-6 bg-slate-700 text-white rounded-full flex items-center justify-center text-xs font-semibold flex-shrink-0 mt-0.5">6</div>
                     <div>
                       <p className="font-medium text-gray-900">Contact Email</p>
                       <p className="text-sm text-gray-600">Valid email address (required)</p>
@@ -686,7 +686,7 @@ ConnectWise,ConnectWise Manage,2024-03-01,2025-03-01,3600.00,admin@company.com`;
               ) : (
                 <div className="space-y-3">
                   <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                    <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-semibold flex-shrink-0 mt-0.5">1</div>
+                    <div className="w-6 h-6 bg-slate-700 text-white rounded-full flex items-center justify-center text-xs font-semibold flex-shrink-0 mt-0.5">1</div>
                     <div>
                       <p className="font-medium text-gray-900">PDF File Format</p>
                       <p className="text-sm text-gray-600">Only PDF files are accepted</p>
@@ -694,7 +694,7 @@ ConnectWise,ConnectWise Manage,2024-03-01,2025-03-01,3600.00,admin@company.com`;
                   </div>
                   
                   <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                    <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-semibold flex-shrink-0 mt-0.5">2</div>
+                    <div className="w-6 h-6 bg-slate-700 text-white rounded-full flex items-center justify-center text-xs font-semibold flex-shrink-0 mt-0.5">2</div>
                     <div>
                       <p className="font-medium text-gray-900">File Size</p>
                       <p className="text-sm text-gray-600">Maximum 10MB per file</p>
@@ -702,7 +702,7 @@ ConnectWise,ConnectWise Manage,2024-03-01,2025-03-01,3600.00,admin@company.com`;
                   </div>
                   
                   <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                    <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-semibold flex-shrink-0 mt-0.5">3</div>
+                    <div className="w-6 h-6 bg-slate-700 text-white rounded-full flex items-center justify-center text-xs font-semibold flex-shrink-0 mt-0.5">3</div>
                     <div>
                       <p className="font-medium text-gray-900">Contract Details</p>
                       <p className="text-sm text-gray-600">Fill in all required fields for each PDF</p>
@@ -710,7 +710,7 @@ ConnectWise,ConnectWise Manage,2024-03-01,2025-03-01,3600.00,admin@company.com`;
                   </div>
                   
                   <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                    <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-semibold flex-shrink-0 mt-0.5">4</div>
+                    <div className="w-6 h-6 bg-slate-700 text-white rounded-full flex items-center justify-center text-xs font-semibold flex-shrink-0 mt-0.5">4</div>
                     <div>
                       <p className="font-medium text-gray-900">Individual Upload</p>
                       <p className="text-sm text-gray-600">Each PDF creates a separate contract</p>
@@ -718,7 +718,7 @@ ConnectWise,ConnectWise Manage,2024-03-01,2025-03-01,3600.00,admin@company.com`;
                   </div>
                   
                   <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                    <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-semibold flex-shrink-0 mt-0.5">5</div>
+                    <div className="w-6 h-6 bg-slate-700 text-white rounded-full flex items-center justify-center text-xs font-semibold flex-shrink-0 mt-0.5">5</div>
                     <div>
                       <p className="font-medium text-gray-900">Document Storage</p>
                       <p className="text-sm text-gray-600">PDFs are securely stored and linked to contracts</p>
@@ -726,7 +726,7 @@ ConnectWise,ConnectWise Manage,2024-03-01,2025-03-01,3600.00,admin@company.com`;
                   </div>
                   
                   <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                    <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-semibold flex-shrink-0 mt-0.5">6</div>
+                    <div className="w-6 h-6 bg-slate-700 text-white rounded-full flex items-center justify-center text-xs font-semibold flex-shrink-0 mt-0.5">6</div>
                     <div>
                       <p className="font-medium text-gray-900">Bulk Upload</p>
                       <p className="text-sm text-gray-600">Select multiple PDFs at once for efficiency</p>
