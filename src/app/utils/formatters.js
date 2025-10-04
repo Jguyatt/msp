@@ -44,12 +44,14 @@ export function daysUntil(endDate) {
 }
 
 export function colorForDaysUntil(days) {
-  if (days < 30) {
-    return 'bg-red-100 text-red-800 border border-red-200';
+  if (days < 0) {
+    return 'bg-red-500 text-white shadow-lg';
+  } else if (days < 30) {
+    return 'bg-red-500 text-white shadow-lg';
   } else if (days < 90) {
-    return 'bg-yellow-100 text-yellow-800 border border-yellow-200';
+    return 'bg-orange-500 text-white shadow-lg';
   } else {
-    return 'bg-green-100 text-green-800 border border-green-200';
+    return 'bg-green-500 text-white shadow-lg';
   }
 }
 

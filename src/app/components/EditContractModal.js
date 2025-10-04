@@ -103,7 +103,7 @@ function EditContractModal({ isOpen, onClose, onSave, contract }) {
         value: parseFloat(formData.value) || 0
       };
       
-      const response = await fetch(`http://localhost:3001/api/contracts/${contract.id}`, {
+      const response = await fetch(`http://localhost:3002/api/contracts/${contract.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

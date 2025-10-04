@@ -15,7 +15,7 @@ function AuditTrail({ contractId }) {
       }
 
       try {
-        const response = await fetch(`http://localhost:3001/api/audit-logs/${contractId}`);
+        const response = await fetch(`http://localhost:3002/api/audit-logs/${contractId}`);
         
         if (!response.ok) {
           throw new Error('Failed to fetch audit logs');

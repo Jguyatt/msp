@@ -11,6 +11,7 @@ import {
   X
 } from 'lucide-react';
 import KPI from '../components/KPI';
+import AnalyticsWidget from '../components/AnalyticsWidget';
 import { useUserSync } from '../../hooks/useUserSync';
 import { contractService } from '../../services/supabaseService';
 
@@ -22,36 +23,56 @@ function SummaryHeader() {
     remindersSentThisWeek: 0,
     estimatedSavings: 0
   });
+  const [contracts, setContracts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchKPIs = async () => {
+      console.log('SummaryHeader: useEffect triggered - userLoading:', userLoading, 'clerkUser:', !!clerkUser, 'supabaseUser:', !!supabaseUser);
+      
       if (userLoading || !clerkUser || !supabaseUser) {
+        console.log('SummaryHeader: Skipping fetch - user not ready');
         setLoading(false);
         return;
       }
 
       try {
         setLoading(true);
+        console.log('SummaryHeader: Fetching contracts for user:', clerkUser.emailAddresses[0].emailAddress);
         
         // Get contracts for the user
-        const contracts = await contractService.getContractsForUser(clerkUser.emailAddresses[0].emailAddress);
+        const contractsData = await contractService.getContractsForUser(clerkUser.emailAddresses[0].emailAddress);
+        console.log('SummaryHeader: Raw contracts data:', contractsData);
+        
+        // Store contracts for analytics widget
+        setContracts(contractsData);
+        
+        // Debug: Log each contract's details
+        contractsData.forEach((contract, index) => {
+          console.log(`SummaryHeader: Contract ${index}:`, {
+            name: contract.contract_name,
+            end_date: contract.end_date,
+            daysUntil: contract.daysUntil
+          });
+        });
         
         // Calculate KPIs from real data
         const today = new Date();
         const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
         
-        const totalContracts = contracts.length;
+        const totalContracts = contractsData.length;
+        console.log('SummaryHeader: Total contracts:', totalContracts);
         
-        const expiringThisMonth = contracts.filter(contract => {
-          const endDate = new Date(contract.end_date);
-          return endDate >= today && endDate <= endOfMonth;
+        const expiringThisMonth = contractsData.filter(contract => {
+          // Use daysUntil for more accurate "expiring soon" detection (within 30 days)
+          return contract.daysUntil <= 30 && contract.daysUntil >= 0;
         }).length;
+        console.log('SummaryHeader: Expiring this month:', expiringThisMonth);
         
         // Count reminders sent this week (from contract reminders)
         const oneWeekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-        const remindersSentThisWeek = contracts.reduce((count, contract) => {
-          if (contract.reminders) {
+        const remindersSentThisWeek = contractsData.reduce((count, contract) => {
+          if (contract.reminders && Array.isArray(contract.reminders)) {
             return count + contract.reminders.filter(reminder => 
               reminder.sent_at && new Date(reminder.sent_at) >= oneWeekAgo
             ).length;
@@ -61,6 +82,13 @@ function SummaryHeader() {
         
         // Calculate estimated savings (rough estimate)
         const estimatedSavings = expiringThisMonth * 200; // $200 per contract renewal
+        
+        console.log('SummaryHeader: Final KPI data:', {
+          totalContracts,
+          expiringThisMonth,
+          remindersSentThisWeek,
+          estimatedSavings
+        });
         
         setKpiData({
           totalContracts,
@@ -110,7 +138,7 @@ function SummaryHeader() {
   ];
 
   return (
-    <div className="bg-white">
+    <div className="bg-white/80 backdrop-blur-xl">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -123,56 +151,64 @@ function SummaryHeader() {
             </div>
           </div>
         </div>
-        
-        {/* KPI Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          {kpis.map((kpi, index) => (
-            <div key={index} className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                      <kpi.icon className="h-5 w-5 text-blue-600" />
+
+        {/* KPI Grid with Analytics Widget */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
+          {/* KPI Cards */}
+          <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-6">
+            {kpis.map((kpi, index) => (
+              <div key={index} className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0">
+                      <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <kpi.icon className="h-5 w-5 text-blue-600" />
+                      </div>
+                    </div>
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-gray-600">{kpi.label}</p>
+                      <p className="text-2xl font-bold text-gray-900">{kpi.value}</p>
                     </div>
                   </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">{kpi.label}</p>
-                    <p className="text-2xl font-bold text-gray-900">{kpi.value}</p>
-                  </div>
+                  {kpi.positive && !loading && (
+                    <div className="flex items-center text-green-600">
+                      <CheckCircle2 className="h-4 w-4 mr-1" />
+                      <span className="text-sm font-medium">Active</span>
+                    </div>
+                  )}
+                  {kpi.urgent && !loading && (
+                    <div className="flex items-center text-red-600">
+                      <AlertTriangle className="h-4 w-4 mr-1" />
+                      <span className="text-sm font-medium">Attention</span>
+                    </div>
+                  )}
                 </div>
-                {kpi.positive && !loading && (
-                  <div className="flex items-center text-green-600">
-                    <CheckCircle2 className="h-4 w-4 mr-1" />
-                    <span className="text-sm font-medium">Active</span>
-                  </div>
-                )}
-                {kpi.urgent && !loading && (
-                  <div className="flex items-center text-red-600">
-                    <AlertTriangle className="h-4 w-4 mr-1" />
-                    <span className="text-sm font-medium">Attention</span>
-                  </div>
-                )}
-              </div>
-              <div className="mt-4">
-                <p className="text-sm text-gray-500">{kpi.sublabel}</p>
-                {/* Progress bar for total contracts */}
-                {index === 0 && !loading && (
-                  <div className="mt-2">
-                    <div className="flex justify-between text-xs text-gray-500 mb-1">
-                      <span>Progress</span>
-                      <span>{kpiData.totalContracts > 0 ? '100%' : '0%'}</span>
+                <div className="mt-4">
+                  <p className="text-sm text-gray-500">{kpi.sublabel}</p>
+                  {/* Progress bar for total contracts */}
+                  {index === 0 && !loading && (
+                    <div className="mt-2">
+                      <div className="flex justify-between text-xs text-gray-500 mb-1">
+                        <span>Progress</span>
+                        <span>{kpiData.totalContracts > 0 ? '100%' : '0%'}</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div 
+                          className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                          style={{ width: kpiData.totalContracts > 0 ? '100%' : '0%' }}
+                        ></div>
+                      </div>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
-                        className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
-                        style={{ width: kpiData.totalContracts > 0 ? '100%' : '0%' }}
-                      ></div>
-                    </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
+          
+          {/* Analytics Widget */}
+          <div className="lg:col-span-1">
+            <AnalyticsWidget contracts={contracts} />
+          </div>
         </div>
 
 

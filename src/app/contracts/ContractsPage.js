@@ -4,9 +4,10 @@ import { Plus, Search, ArrowRight, Filter, Download, MoreHorizontal, Calendar, A
 import ContractsTable from './ContractsTable';
 import DetailDrawer from './DetailDrawer';
 import AddContractModal from '../components/AddContractModal';
-import EmptyState from '../components/EmptyState';
+import { ContractsEmptyState } from '../components/EmptyStates';
 import { contractService } from '../../services/supabaseService';
 import { useUserSync } from '../../hooks/useUserSync';
+import { supabase } from '../../lib/supabase';
 
 // Utility function to format time ago
 const formatTimeAgo = (date) => {
@@ -26,43 +27,69 @@ function ContractsPage({ isCompact = false }) {
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedContract, setSelectedContract] = useState(null);
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
+  const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || 'all');
   const [contracts, setContracts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedContracts, setSelectedContracts] = useState([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
+  
+  // Define contract categories
+  const categories = [
+    { value: 'all', label: 'All Categories', count: contracts.length },
+    { value: 'Lease', label: 'Lease', count: contracts.filter(c => c.category === 'Lease').length },
+    { value: 'Supplier', label: 'Supplier', count: contracts.filter(c => c.category === 'Supplier').length },
+    { value: 'Services', label: 'Services', count: contracts.filter(c => c.category === 'Services').length },
+    { value: 'Franchise', label: 'Franchise', count: contracts.filter(c => c.category === 'Franchise').length },
+    { value: 'Software', label: 'Software', count: contracts.filter(c => c.category === 'Software').length },
+    { value: 'Hardware', label: 'Hardware', count: contracts.filter(c => c.category === 'Hardware').length },
+    { value: 'Marketing', label: 'Marketing', count: contracts.filter(c => c.category === 'Marketing').length },
+    { value: 'Utilities', label: 'Utilities', count: contracts.filter(c => c.category === 'Utilities').length },
+    { value: 'Insurance', label: 'Insurance', count: contracts.filter(c => c.category === 'Insurance').length },
+  ];
 
   // Fetch contracts from Supabase
   useEffect(() => {
     const fetchContracts = async () => {
+      console.log('useEffect triggered - userLoading:', userLoading, 'clerkUser:', !!clerkUser, 'supabaseUser:', !!supabaseUser);
+      
       if (userLoading || !clerkUser || !supabaseUser) {
+        console.log('Skipping fetch - user not ready');
         setLoading(false);
         return;
       }
 
       try {
         setLoading(true);
+        console.log('Fetching contracts for user:', clerkUser.emailAddresses[0].emailAddress);
+        console.log('Supabase user:', supabaseUser);
+        
         // Use the user's email to get their contracts
         const data = await contractService.getContractsForUser(clerkUser.emailAddresses[0].emailAddress);
         
-        // Transform data to match expected format
-        const transformedContracts = data.map(contract => {
-          const endDate = new Date(contract.end_date);
-          const today = new Date();
-          const daysUntil = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
-          
-          return {
-            ...contract,
-            daysUntil,
-            reminders: {
-              d90: contract.reminders?.find(r => r.days_before_expiry === 90)?.status === 'sent',
-              d60: contract.reminders?.find(r => r.days_before_expiry === 60)?.status === 'sent',
-              d30: contract.reminders?.find(r => r.days_before_expiry === 30)?.status === 'sent'
-            }
-          };
-        });
+        console.log('Raw contracts data from Supabase:', data);
         
-        setContracts(transformedContracts);
+        // Transform data to match expected format (daysUntil is already calculated in the service)
+        const transformedContracts = data
+          .filter(contract => contract && contract.id) // Filter out any null/undefined contracts first
+          .map(contract => {
+            return {
+              ...contract,
+              // daysUntil is already calculated in supabaseService.js, no need to recalculate
+              reminders: {
+                d90: Array.isArray(contract.reminders) ? contract.reminders.find(r => r.days_before_expiry === 90)?.status === 'sent' : false,
+                d60: Array.isArray(contract.reminders) ? contract.reminders.find(r => r.days_before_expiry === 60)?.status === 'sent' : false,
+                d30: Array.isArray(contract.reminders) ? contract.reminders.find(r => r.days_before_expiry === 30)?.status === 'sent' : false
+              }
+            };
+          });
+        
+        console.log('Transformed contracts:', transformedContracts);
+        
+        // Filter out any undefined/null contracts
+        const validContracts = transformedContracts.filter(contract => contract && contract.id);
+        console.log('Valid contracts after filtering:', validContracts);
+        setContracts(validContracts);
       } catch (error) {
         console.error('Error fetching contracts from Supabase:', error);
         setContracts([]);
@@ -75,14 +102,38 @@ function ContractsPage({ isCompact = false }) {
   }, [clerkUser, supabaseUser, userLoading]);
 
   const filteredContracts = useMemo(() => {
-    if (!searchTerm) return contracts;
+    let filtered = contracts;
     
-    return contracts.filter(contract => 
-      contract.vendor.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      contract.contract_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      contract.id.toString().includes(searchTerm.toLowerCase())
-    );
-  }, [contracts, searchTerm]);
+    // Filter by category
+    if (selectedCategory && selectedCategory !== 'all') {
+      filtered = filtered.filter(contract => contract.category === selectedCategory);
+    }
+    
+    // Filter by search term
+    if (searchTerm) {
+      filtered = filtered.filter(contract => 
+        contract.vendor?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        contract.contract_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        contract.category?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        contract.id?.toString().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    return filtered;
+  }, [contracts, searchTerm, selectedCategory]);
+
+  const handleCategoryChange = (category) => {
+    setSelectedCategory(category);
+    setSearchParams(prev => {
+      const params = new URLSearchParams(prev);
+      if (category === 'all') {
+        params.delete('category');
+      } else {
+        params.set('category', category);
+      }
+      return params;
+    });
+  };
 
   const handleSearchChange = (e) => {
     const value = e.target.value;
@@ -102,15 +153,75 @@ function ContractsPage({ isCompact = false }) {
     setShowAddModal(true);
   };
 
+  // Debug function to test direct contract fetch
+  const debugFetchContracts = async () => {
+    try {
+      console.log('=== DEBUG: Direct contract fetch ===');
+      const { data, error } = await supabase
+        .from('contracts')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      console.log('Direct fetch result:', { data, error });
+      if (data) {
+        console.log('Found contracts:', data.length);
+        data.forEach((contract, index) => {
+          console.log(`Contract ${index + 1}:`, {
+            id: contract.id,
+            vendor: contract.vendor,
+            contract_name: contract.contract_name,
+            company_id: contract.company_id,
+            created_at: contract.created_at
+          });
+        });
+      }
+    } catch (err) {
+      console.error('Debug fetch error:', err);
+    }
+  };
+
+  // Add debug button (temporary)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.debugFetchContracts = debugFetchContracts;
+    }
+  }, []);
+
   const handleContractSaved = (newContract) => {
+    console.log('Contract saved, adding to list:', newContract);
+    
+    // Check if newContract is valid and has required fields
+    if (!newContract || !newContract.id) {
+      console.error('Invalid contract data received:', newContract);
+      setShowAddModal(false);
+      return;
+    }
+    
+    // Transform the new contract to match the expected format
+    const endDate = newContract.end_date ? new Date(newContract.end_date) : new Date();
+    const today = new Date();
+    const daysUntil = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
+    
+    const transformedContract = {
+      ...newContract,
+      daysUntil,
+      reminders: {
+        d90: false,
+        d60: false,
+        d30: false
+      }
+    };
+    
+    console.log('Transformed contract for list:', transformedContract);
+    
     // Add the new contract to the list
-    setContracts(prev => [newContract, ...prev]);
+    setContracts(prev => [transformedContract, ...prev]);
     setShowAddModal(false);
   };
 
   const handleDeleteContract = async (contractId) => {
     try {
-      const response = await fetch('http://localhost:3001/api/contracts', {
+      const response = await fetch('http://localhost:3002/api/contracts', {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -293,7 +404,7 @@ function ContractsPage({ isCompact = false }) {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-slate-600 mb-1">Expiring Soon</p>
-                    <p className="text-3xl font-bold text-red-600">{contracts.filter(c => c.daysUntil <= 30).length}</p>
+                    <p className="text-3xl font-bold text-red-600">{contracts.filter(c => c && c.daysUntil !== undefined && c.daysUntil <= 30).length}</p>
                   </div>
                   <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center">
                     <AlertTriangle className="h-6 w-6 text-red-600" />
@@ -305,7 +416,7 @@ function ContractsPage({ isCompact = false }) {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-slate-600 mb-1">This Month</p>
-                    <p className="text-3xl font-bold text-orange-600">{contracts.filter(c => c.daysUntil <= 60).length}</p>
+                    <p className="text-3xl font-bold text-orange-600">{contracts.filter(c => c && c.daysUntil !== undefined && c.daysUntil <= 60).length}</p>
                   </div>
                   <div className="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center">
                     <Calendar className="h-6 w-6 text-orange-600" />
@@ -317,7 +428,7 @@ function ContractsPage({ isCompact = false }) {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-slate-600 mb-1">Renewal Rate</p>
-                    <p className="text-3xl font-bold text-green-600">94%</p>
+                    <p className="text-3xl font-bold text-green-600">--</p>
                   </div>
                   <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center">
                     <ArrowRight className="h-6 w-6 text-green-600" />
@@ -326,6 +437,34 @@ function ContractsPage({ isCompact = false }) {
               </div>
             </div>
           )}
+
+          {/* Category Filter Pills */}
+          <div className="mb-6">
+            <div className="flex items-center gap-2 overflow-x-auto pb-2">
+              {categories.map((category) => (
+                <button
+                  key={category.value}
+                  onClick={() => handleCategoryChange(category.value)}
+                  className={`px-4 py-2.5 rounded-lg text-sm font-semibold whitespace-nowrap transition-all duration-200 ${
+                    selectedCategory === category.value
+                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md'
+                      : 'bg-white/80 text-slate-700 border border-slate-200 hover:bg-white hover:border-slate-300'
+                  }`}
+                >
+                  {category.label}
+                  {category.count > 0 && (
+                    <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${
+                      selectedCategory === category.value
+                        ? 'bg-white/20'
+                        : 'bg-slate-100'
+                    }`}>
+                      {category.count}
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
 
           {/* Search and Filters */}
           <div className="flex items-center gap-4 mb-8">
@@ -343,14 +482,13 @@ function ContractsPage({ isCompact = false }) {
             </div>
             {!isCompact && (
               <div className="flex items-center gap-3">
-                <button className="px-4 py-2.5 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 hover:border-slate-400 transition-all duration-200">
-                  All Status
+                <button className="px-4 py-2.5 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 hover:border-slate-400 transition-all duration-200 flex items-center gap-2">
+                  <Filter className="h-4 w-4" />
+                  More Filters
                 </button>
-                <button className="px-4 py-2.5 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 hover:border-slate-400 transition-all duration-200">
-                  All Vendors
-                </button>
-                <button className="px-3 py-2.5 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 hover:border-slate-400 transition-all duration-200">
-                  <MoreHorizontal className="h-4 w-4" />
+                <button className="px-4 py-2.5 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 hover:border-slate-400 transition-all duration-200 flex items-center gap-2">
+                  <Download className="h-4 w-4" />
+                  Export
                 </button>
               </div>
             )}
@@ -358,42 +496,116 @@ function ContractsPage({ isCompact = false }) {
         </div>
 
             {/* Contracts Table */}
-            <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-              <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-medium text-gray-900">
-                    {isCompact ? 'Quick Actions & Activity' : 'All Contracts'}
-                  </h3>
-                  {isCompact && (
-                    <div className="text-sm text-gray-500">
-                      Common tasks and recent updates
-                    </div>
-                  )}
-                </div>
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h3 className="text-2xl font-bold text-slate-900">
+                  {isCompact ? 'Recent Contracts' : 'All Contracts'}
+                </h3>
+                {!isCompact && (
+                  <div className="text-sm font-medium text-slate-500">
+                    {filteredContracts.length} {filteredContracts.length === 1 ? 'contract' : 'contracts'}
+                  </div>
+                )}
+                {isCompact && (
+                  <div className="text-sm text-slate-500">
+                    Latest contract activity and renewals
+                  </div>
+                )}
               </div>
               
               {/* Show empty state if no contracts */}
               {contracts.length === 0 ? (
-                <EmptyState
-                  title="No contracts yet"
-                  description="Get started by adding your first contract to begin tracking renewals and managing your agreements."
-                  primaryAction={{
-                    label: "Add Your First Contract",
-                    icon: Plus,
-                    onClick: handleAddContract
-                  }}
-                  secondaryAction={{
-                    label: "Upload CSV",
-                    icon: UploadCloud,
-                    onClick: () => window.location.href = '/app/upload'
-                  }}
+                <ContractsEmptyState
+                  onUpload={() => setShowAddModal(true)}
+                  onAddManual={() => setShowAddModal(true)}
                 />
               ) : isCompact ? (
-                <div className="p-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Quick Actions */}
-                    <div className="space-y-3">
-                      <h4 className="text-sm font-semibold text-gray-700 mb-3">Quick Actions</h4>
+                <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                  {/* Recent Contracts Table */}
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Vendor
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Contract
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            End Date
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Days Until Expiry
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Status
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {contracts.slice(0, 5).map((contract) => (
+                          <tr key={contract.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => setSelectedContract(contract)}>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm font-medium text-gray-900">
+                                {contract.vendor}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm text-gray-900">
+                                {contract.contract_name || contract.contractName}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm text-gray-900">
+                                {new Date(contract.end_date || contract.endDate).toLocaleDateString()}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                contract.daysUntil < 0 
+                                  ? 'bg-red-100 text-red-800'
+                                  : contract.daysUntil <= 30 
+                                    ? 'bg-orange-100 text-orange-800'
+                                    : contract.daysUntil <= 90
+                                      ? 'bg-yellow-100 text-yellow-800'
+                                      : 'bg-green-100 text-green-800'
+                              }`}>
+                                {contract.daysUntil || 0} days
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                contract.daysUntil < 0 
+                                  ? 'bg-red-100 text-red-800'
+                                  : contract.daysUntil <= 30 
+                                    ? 'bg-orange-100 text-orange-800'
+                                    : 'bg-green-100 text-green-800'
+                              }`}>
+                                {contract.daysUntil < 0 
+                                  ? 'Expired'
+                                  : contract.daysUntil <= 30 
+                                    ? 'Expiring Soon'
+                                    : 'Active'
+                                }
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  
+                  {/* View All Contracts Button */}
+                  <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
+                    <button
+                      onClick={() => window.location.href = '/app/contracts'}
+                      className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors"
+                    >
+                      View All Contracts
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </div>
                       
                       <button 
                         onClick={handleAddContract}
@@ -409,15 +621,15 @@ function ContractsPage({ isCompact = false }) {
                       </button>
                       
                       <button 
-                        onClick={() => window.location.href = '/app/upload'}
+                        onClick={() => setShowAddModal(true)}
                         className="w-full flex items-center gap-3 p-3 bg-green-50 hover:bg-green-100 rounded-lg transition-colors text-left"
                       >
                         <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
                           <UploadCloud className="w-4 h-4 text-white" />
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-gray-900">Upload CSV</p>
-                          <p className="text-xs text-gray-500">Bulk import contracts from file</p>
+                          <p className="text-sm font-medium text-gray-900">Add Contract</p>
+                          <p className="text-xs text-gray-500">Add new contract manually</p>
                         </div>
                       </button>
                       
@@ -435,65 +647,6 @@ function ContractsPage({ isCompact = false }) {
                       </button>
                     </div>
                     
-                    {/* Recent Activity */}
-                    <div className="space-y-3">
-                      <h4 className="text-sm font-semibold text-gray-700 mb-3">Recent Activity</h4>
-                      
-                      <div className="space-y-3">
-                        {(() => {
-                          // Get recent contracts (last 5) and format as activity
-                          const recentContracts = contracts
-                            .sort((a, b) => new Date(b.created_at || b.id) - new Date(a.created_at || a.id))
-                            .slice(0, 5);
-                          
-                          if (recentContracts.length === 0) {
-                            return (
-                              <div className="text-center py-4">
-                                <p className="text-xs text-gray-500">No recent activity</p>
-                              </div>
-                            );
-                          }
-                          
-                          return recentContracts.map((contract, index) => {
-                            const timeAgo = formatTimeAgo(contract.created_at || new Date(Date.now() - index * 24 * 60 * 60 * 1000));
-                            const isOverdue = contract.daysUntil < 0;
-                            const isUrgent = contract.daysUntil <= 30 && contract.daysUntil >= 0;
-                            const isSoon = contract.daysUntil <= 90 && contract.daysUntil > 30;
-                            
-                            let color = 'gray';
-                            let action = 'Contract added';
-                            
-                            if (isOverdue) {
-                              color = 'red';
-                              action = 'Contract expired';
-                            } else if (isUrgent) {
-                              color = 'orange';
-                              action = 'Contract expiring soon';
-                            } else if (isSoon) {
-                              color = 'yellow';
-                              action = 'Contract expiring';
-                            } else {
-                              color = 'green';
-                              action = 'Contract added';
-                            }
-                            
-                            return (
-                              <div key={contract.id} className="flex items-center gap-3 p-2">
-                                <div className={`w-2 h-2 bg-${color}-500 rounded-full`}></div>
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-xs text-gray-900 truncate">
-                                    {action}: {contract.vendor}
-                                  </p>
-                                  <p className="text-xs text-gray-500">{timeAgo}</p>
-                                </div>
-                              </div>
-                            );
-                          });
-                        })()}
-                      </div>
-                    </div>
-                  </div>
-                </div>
               ) : (
                 <ContractsTable 
                   contracts={contractsToShow}
@@ -511,7 +664,7 @@ function ContractsPage({ isCompact = false }) {
           <div className="mt-6 text-center">
             <button 
               onClick={() => window.location.href = '/app/contracts'}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-800 transition-colors"
             >
               View All Contracts
               <ArrowRight className="h-4 w-4" />

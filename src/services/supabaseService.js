@@ -1,4 +1,6 @@
 import { supabase } from '../lib/supabase';
+import { awsUploadService as fileUploadService } from './awsUploadService';
+import { obligationService } from './obligationService';
 
 // Contract operations
 export const contractService = {
@@ -23,22 +25,114 @@ export const contractService = {
     return data;
   },
 
+  // Get contract clauses for a specific contract
+  async getContractClauses(contractId) {
+    try {
+      const { data, error } = await supabase
+        .from('contract_clauses')
+        .select('*')
+        .eq('contract_id', contractId)
+        .order('extracted_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (error && error.code !== 'PGRST116') { // PGRST116 is "no rows found"
+        console.error('Error fetching contract clauses:', error);
+        throw error;
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Error in getContractClauses:', error);
+      return null;
+    }
+  },
+
   // Get contracts for current user (by email)
   async getContractsForUser(userEmail) {
     try {
-      const response = await fetch(`/api/contracts?userEmail=${encodeURIComponent(userEmail)}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      });
+      console.log('getContractsForUser called with email:', userEmail);
+      
+      // First get the user to find their company
+      const { data: user, error: userError } = await supabase
+        .from('users')
+        .select('company_id')
+        .eq('email', userEmail)
+        .single();
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to fetch contracts');
+      console.log('User lookup result:', { user, userError });
+
+      if (userError || !user) {
+        console.error('User lookup error:', userError);
+        return []; // Return empty array if user not found
       }
 
-      return await response.json();
+      console.log('Looking for contracts with company_id:', user.company_id);
+      
+      // Get contracts for the company
+      const { data: contracts, error } = await supabase
+        .from('contracts')
+        .select(`
+          *,
+          contract_pdf_url,
+          contract_pdf_id,
+          reminders (
+            id,
+            reminder_type,
+            days_before_expiry,
+            sent_at,
+            status
+          )
+        `)
+        .eq('company_id', user.company_id)
+        .order('end_date', { ascending: true });
+
+      console.log('Contracts query result:', { contracts, error });
+
+      if (error) {
+        console.error('Contracts fetch error:', error);
+        throw new Error('Failed to fetch contracts');
+      }
+
+      // Add calculated fields
+      const contractsWithCalculations = contracts.map(contract => {
+        let daysUntil = 0;
+        if (contract.end_date) {
+          const endDate = new Date(contract.end_date);
+          if (!isNaN(endDate.getTime())) {
+            const today = new Date();
+            daysUntil = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
+          }
+        }
+        
+        // Create reminders object from database data
+        const reminders = {
+          d90: false,
+          d60: false,
+          d30: false
+        };
+        
+        if (contract.reminders) {
+          contract.reminders.forEach(reminder => {
+            if (reminder.reminder_type === '90_day' && reminder.status === 'sent') {
+              reminders.d90 = true;
+            } else if (reminder.reminder_type === '60_day' && reminder.status === 'sent') {
+              reminders.d60 = true;
+            } else if (reminder.reminder_type === '30_day' && reminder.status === 'sent') {
+              reminders.d30 = true;
+            }
+          });
+        }
+        
+        return {
+          ...contract,
+          daysUntil,
+          reminders,
+          value: contract.value || 0
+        };
+      });
+      
+      return contractsWithCalculations;
     } catch (error) {
       console.error('Error getting contracts for user:', error);
       throw error;
@@ -69,25 +163,118 @@ export const contractService = {
   },
 
   // Create a new contract
-  async createContract(contractData, userEmail) {
+  async createContract(contractData, userEmail, pdfFile = null) {
     try {
-      const response = await fetch('/api/contracts', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contractData,
-          userEmail
-        })
-      });
+      console.log('Starting contract creation for user:', userEmail);
+      
+      // First get the user to find their company
+      const { data: user, error: userError } = await supabase
+        .from('users')
+        .select('company_id, id')
+        .eq('email', userEmail)
+        .single();
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to create contract');
+      console.log('User lookup result:', { user, userError });
+
+      if (userError) {
+        console.error('User lookup error:', userError);
+        if (userError.code === 'PGRST116') {
+          throw new Error('User not found. Please make sure you are logged in and your account is set up.');
+        }
+        throw new Error(`User lookup failed: ${userError.message}`);
       }
 
-      return await response.json();
+      if (!user) {
+        throw new Error('User not found in database. Please contact support.');
+      }
+
+      console.log('User found:', user);
+
+      // Add company_id and created_by to contract data
+      const contractWithCompany = {
+        ...contractData,
+        company_id: user.company_id,
+        created_by: user.id
+      };
+
+      console.log('Contract data to insert:', contractWithCompany);
+
+      const { data, error } = await supabase
+        .from('contracts')
+        .insert([contractWithCompany])
+        .select()
+        .single();
+
+      console.log('Contract insert result:', { data, error });
+
+      if (error) {
+        console.error('Contract creation error:', error);
+        if (error.code === '23505') {
+          throw new Error('A contract with this information already exists.');
+        } else if (error.code === '23503') {
+          throw new Error('Invalid company or user reference. Please contact support.');
+        }
+        throw new Error(`Failed to create contract: ${error.message}`);
+      }
+
+      console.log('Contract created successfully:', data);
+
+      // Handle PDF upload if provided
+      if (pdfFile) {
+        try {
+          console.log('Uploading PDF file...');
+          const fileResult = await fileUploadService.uploadContractPDF(
+            pdfFile,
+            data.id,
+            user.id,
+            user.company_id
+          );
+          
+          // Update contract with PDF info
+          const { error: updateError } = await supabase
+            .from('contracts')
+            .update({
+              contract_pdf_id: fileResult.id,
+              contract_pdf_url: fileResult.url
+            })
+            .eq('id', data.id);
+
+          if (updateError) {
+            console.warn('Failed to update contract with PDF info:', updateError);
+          } else {
+            console.log('Contract updated with PDF info');
+            data.contract_pdf_id = fileResult.id;
+            data.contract_pdf_url = fileResult.url;
+          }
+        } catch (pdfError) {
+          console.warn('PDF upload failed, but contract was created:', pdfError);
+          // Don't fail the entire operation if PDF upload fails
+        }
+      }
+
+      // Create audit log entry (optional, don't fail if this fails)
+      try {
+        await supabase
+          .from('audit_logs')
+          .insert([{
+            contract_id: data.id,
+            user_id: user.id,
+            action: 'contract_created',
+            details: `Contract created: ${data.vendor} - ${data.contract_name}`,
+            changes: {
+              vendor: data.vendor,
+              contract_name: data.contract_name,
+              end_date: data.end_date,
+              value: data.value
+            }
+          }]);
+        console.log('Audit log created successfully');
+      } catch (auditError) {
+        console.warn('Failed to create audit log:', auditError);
+        // Don't throw here, contract creation was successful
+      }
+
+      return data;
     } catch (error) {
       console.error('Error creating contract:', error);
       throw error;
@@ -146,14 +333,19 @@ export const userService = {
   // Sync Clerk user with Supabase
   async syncClerkUser(clerkUser) {
     try {
+      console.log('syncClerkUser: Starting sync for:', clerkUser.emailAddresses[0].emailAddress);
+      
       // First, check if user already exists
-      const { data: existingUser } = await supabase
+      const { data: existingUser, error: existingUserError } = await supabase
         .from('users')
         .select('*')
         .eq('email', clerkUser.emailAddresses[0].emailAddress)
         .single();
 
+      console.log('syncClerkUser: Existing user check:', { existingUser, existingUserError });
+
       if (existingUser) {
+        console.log('syncClerkUser: Updating existing user');
         // Update existing user with latest Clerk data
         const { data, error } = await supabase
           .from('users')
@@ -166,9 +358,14 @@ export const userService = {
           .select()
           .single();
 
-        if (error) throw error;
+        if (error) {
+          console.error('syncClerkUser: Error updating user:', error);
+          throw error;
+        }
+        console.log('syncClerkUser: User updated successfully:', data);
         return data;
       } else {
+        console.log('syncClerkUser: Creating new user and company');
         // Create new user and company
         const companyName = clerkUser.emailAddresses[0].emailAddress.split('@')[1];
         
@@ -182,7 +379,11 @@ export const userService = {
           .select()
           .single();
 
-        if (companyError) throw companyError;
+        if (companyError) {
+          console.error('syncClerkUser: Error creating company:', companyError);
+          throw companyError;
+        }
+        console.log('syncClerkUser: Company created:', company);
 
         // Create user
         const { data: user, error: userError } = await supabase
@@ -197,11 +398,15 @@ export const userService = {
           .select()
           .single();
 
-        if (userError) throw userError;
+        if (userError) {
+          console.error('syncClerkUser: Error creating user:', userError);
+          throw userError;
+        }
+        console.log('syncClerkUser: User created successfully:', user);
         return user;
       }
     } catch (error) {
-      console.error('Error syncing Clerk user:', error);
+      console.error('syncClerkUser: Error syncing Clerk user:', error);
       throw error;
     }
   },
@@ -299,20 +504,34 @@ export const subscriptionService = {
   async getUserSubscription(userId) {
     try {
       console.log('Subscription Service - Looking for subscription with user_id:', userId);
+      
+      // First try to get any subscription (active or canceled)
       const { data, error } = await supabase
         .from('subscriptions')
         .select('*')
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
         .limit(1)
-        .single();
+        .maybeSingle(); // Use maybeSingle instead of single to handle no results gracefully
 
       console.log('Subscription Service - Query result:', { data, error });
-      if (error && error.code !== 'PGRST116') throw error; // PGRST116 = no rows returned
-      return data;
+      
+      if (error) {
+        console.error('Database error:', error);
+        return null; // Return null instead of throwing
+      }
+      
+      if (data) {
+        console.log('✅ Found subscription:', data.plan_name, 'Status:', data.status, 'for user:', userId);
+        return data;
+      } else {
+        console.log('❌ No subscription found for user:', userId);
+        return null;
+      }
+      
     } catch (error) {
       console.error('Error getting user subscription:', error);
-      throw error;
+      return null; // Return null instead of throwing to prevent UI crashes
     }
   },
 
@@ -521,3 +740,6 @@ export const analyticsService = {
     return data;
   }
 };
+
+// Export obligation service for task management
+export { obligationService };

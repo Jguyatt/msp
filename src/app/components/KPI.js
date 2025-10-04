@@ -2,13 +2,13 @@ import React from 'react';
 
 function KPI({ icon: Icon, label, value, sublabel, positive = false, urgent = false }) {
   const colorClasses = urgent 
-    ? 'text-red-600 bg-red-50 border-red-200'
+    ? 'text-red-600 bg-red-50/80 border-red-200/50 backdrop-blur-sm'
     : positive 
-    ? 'text-green-600 bg-green-50 border-green-200'
-    : 'text-blue-600 bg-blue-50 border-blue-200';
+    ? 'text-green-600 bg-green-50/80 border-green-200/50 backdrop-blur-sm'
+    : 'text-blue-600 bg-blue-50/80 border-blue-200/50 backdrop-blur-sm';
 
   return (
-    <div className="bg-white border border-slate-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+    <div className="bg-white/80 backdrop-blur-xl border border-white/30 rounded-lg p-4 hover:shadow-xl transition-all duration-300">
       <div className="flex items-center justify-between mb-2">
         <div className={`p-2 rounded-lg border ${colorClasses}`}>
           <Icon className="h-5 w-5" />

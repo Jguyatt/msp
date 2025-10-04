@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { User, Bell, CreditCard, Upload, Users, AlertTriangle, CheckCircle, Calendar, Download, ExternalLink, Settings as SettingsIcon, Search } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { User, Bell, CreditCard, Upload, Users, Calendar, Download, ExternalLink, Settings as SettingsIcon, Search } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useUserSync } from '../../hooks/useUserSync';
 import { subscriptionService } from '../../services/supabaseService';
+import TeamManagement from './TeamManagement';
 
 function SettingsPage() {
   const { clerkUser, supabaseUser, loading: userLoading } = useUserSync();
+  const navigate = useNavigate();
   const [companyName, setCompanyName] = useState('');
   const [domain, setDomain] = useState('');
   const [subscription, setSubscription] = useState(null);
@@ -14,8 +16,9 @@ function SettingsPage() {
   const [invoices, setInvoices] = useState([]);
   const [activeTab, setActiveTab] = useState('profile');
   
+  // Using Stripe Customer Portal for subscription management
+  
   // Reminder settings state
-  const [reminderIntervals, setReminderIntervals] = useState([90, 60, 30]);
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [inAppNotifications, setInAppNotifications] = useState(true);
   const [savingReminders, setSavingReminders] = useState(false);
@@ -61,8 +64,8 @@ function SettingsPage() {
         setLastName(supabaseUser.last_name || '');
         
         // TODO: Fetch real invoices from Stripe
-        // For now, show mock data based on subscription
-        if (userSubscription) {
+        // For now, show mock data based on subscription (only for paid plans)
+        if (userSubscription && userSubscription.plan_name !== 'Free' && userSubscription.stripe_subscription_id) {
           setInvoices([
             {
               id: userSubscription.stripe_subscription_id?.slice(-8) || '12345',
@@ -72,6 +75,8 @@ function SettingsPage() {
               url: `https://dashboard.stripe.com/invoices/${userSubscription.stripe_subscription_id}`
             }
           ]);
+        } else {
+          setInvoices([]);
         }
         
       } catch (error) {
@@ -82,6 +87,20 @@ function SettingsPage() {
     };
 
     fetchData();
+    
+    // Refresh subscription every 30 seconds to catch Stripe portal changes
+    const interval = setInterval(() => {
+      if (supabaseUser && !userLoading) {
+        // Only refresh subscription data, not all profile data
+        subscriptionService.getUserSubscription(supabaseUser.id)
+          .then(userSubscription => {
+            setSubscription(userSubscription);
+          })
+          .catch(error => console.error('Error refreshing subscription:', error));
+      }
+    }, 30000);
+    
+    return () => clearInterval(interval);
   }, [supabaseUser, userLoading]);
 
   const getPlanPrice = (planName) => {
@@ -96,59 +115,16 @@ function SettingsPage() {
 
   const getPlanLimits = (planName) => {
     const limits = {
-      'Free': 5,
+      'Free': 2,
       'Starter': 50,
       'Professional': 200,
       'Enterprise': 'Unlimited'
     };
-    return limits[planName] || 5;
+    return limits[planName] || 2;
   };
 
-  const handleCancelSubscription = async () => {
-    if (!subscription) return;
-    
-    const confirmed = window.confirm(
-      'Are you sure you want to cancel your subscription? You will lose access to premium features at the end of your current billing period.'
-    );
-    
-    if (!confirmed) return;
-    
-    try {
-      setCancelling(true);
-      
-      // Call your backend API to cancel subscription in Stripe
-      const response = await fetch('http://localhost:3001/api/cancel-subscription', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          subscriptionId: subscription.stripe_subscription_id,
-          cancelAtPeriodEnd: true // Cancel at end of billing period
-        })
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to cancel subscription');
-      }
-      
-      // Refresh subscription data
-      const updatedSubscription = await subscriptionService.getUserSubscription(supabaseUser.id);
-      setSubscription(updatedSubscription);
-      
-      alert('Your subscription has been canceled. You will retain access until the end of your current billing period.');
-      
-    } catch (error) {
-      console.error('Error canceling subscription:', error);
-      alert('Error canceling subscription. Please try again or contact support.');
-    } finally {
-      setCancelling(false);
-    }
-  };
+  // Using Stripe Customer Portal for subscription management - no custom handler needed
 
-  const handleUpgrade = () => {
-    window.open('/app/plans', '_blank');
-  };
 
   const handleDownloadInvoice = (invoice) => {
     if (invoice.url) {
@@ -159,15 +135,6 @@ function SettingsPage() {
   };
 
   // Reminder settings handlers
-  const handleReminderIntervalChange = (days) => {
-    setReminderIntervals(prev => {
-      if (prev.includes(days)) {
-        return prev.filter(d => d !== days);
-      } else {
-        return [...prev, days].sort((a, b) => b - a);
-      }
-    });
-  };
 
   const handleSaveReminderSettings = async () => {
     setSavingReminders(true);
@@ -181,7 +148,6 @@ function SettingsPage() {
       //   method: 'POST',
       //   headers: { 'Content-Type': 'application/json' },
       //   body: JSON.stringify({
-      //     intervals: reminderIntervals,
       //     emailNotifications,
       //     inAppNotifications
       //   })
@@ -293,6 +259,11 @@ function SettingsPage() {
 
   // Billing Settings Component
   const renderBillingSettings = () => {
+    // Only show Free plan if no subscription OR if subscription is explicitly canceled
+    const currentPlan = (!subscription || subscription?.status === 'canceled') ? 'Free' : (subscription?.plan_name || 'Free');
+    const planPrice = getPlanPrice(currentPlan);
+    const planLimits = getPlanLimits(currentPlan);
+    
     return (
       <div>
         <h2 className="text-xl font-semibold text-gray-900 mb-6">Billing & Plans</h2>
@@ -301,30 +272,82 @@ function SettingsPage() {
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Current Plan</h3>
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-2xl font-bold text-gray-900">Professional Plan</div>
-                <div className="text-gray-600">$79/month • 200 contracts</div>
+                <div className="text-2xl font-bold text-gray-900">{currentPlan} Plan</div>
+                <div className="text-gray-600">
+                  {planPrice === 0 ? 'Free' : `$${planPrice}/month`} • {planLimits === 'Unlimited' ? 'Unlimited' : `${planLimits} contracts`}
+                </div>
               </div>
-              <button className="px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                Upgrade Plan
-              </button>
+              {currentPlan !== 'Enterprise' && currentPlan !== 'Free' && (
+                <div className="flex gap-2">
+                  <a 
+                    href="https://billing.stripe.com/p/login/aFa7sL08Mb9u0WW6uqdAk00"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-800 transition-colors inline-block text-center"
+                  >
+                    Manage Subscription
+                  </a>
+                  <button 
+                    onClick={async () => {
+                      if (supabaseUser) {
+                        const userSubscription = await subscriptionService.getUserSubscription(supabaseUser.id);
+                        setSubscription(userSubscription);
+                      }
+                    }}
+                    className="px-3 py-2 text-sm bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors"
+                    title="Refresh subscription status"
+                  >
+                    🔄
+                  </button>
+                </div>
+              )}
+              {currentPlan === 'Free' && (
+                <button 
+                  onClick={() => navigate('/app/plans')}
+                  className="px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Upgrade Plan
+                </button>
+              )}
             </div>
           </div>
 
           <div className="bg-gray-50 rounded-lg p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Invoices</h3>
             <div className="space-y-3">
-              <div className="flex items-center justify-between py-2">
-                <div>
-                  <div className="font-medium text-gray-900">Invoice #12345</div>
-                  <div className="text-sm text-gray-600">Dec 15, 2024</div>
+              {invoices.length > 0 ? (
+                invoices.map((invoice) => (
+                  <div key={invoice.id} className="flex items-center justify-between py-2">
+                    <div>
+                      <div className="font-medium text-gray-900">Invoice #{invoice.id}</div>
+                      <div className="text-sm text-gray-600">{invoice.date}</div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg font-semibold text-gray-900">
+                        ${invoice.amount === 'Custom' ? 'Custom' : invoice.amount.toFixed(2)}
+                      </span>
+                      {invoice.url && (
+                        <button 
+                          onClick={() => window.open(invoice.url, '_blank')}
+                          className="p-2 text-gray-400 hover:text-gray-600"
+                        >
+                          <Download className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8">
+                  <div className="text-gray-500 mb-2">No invoices yet</div>
+                  <div className="text-sm text-gray-400">
+                    {currentPlan === 'Free' 
+                      ? 'Invoices will appear here when you upgrade to a paid plan'
+                      : 'Your invoices will appear here'
+                    }
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-lg font-semibold text-gray-900">$79.00</span>
-                  <button className="p-2 text-gray-400 hover:text-gray-600">
-                    <Download className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
@@ -529,45 +552,6 @@ function SettingsPage() {
         </div>
 
         <div className="space-y-8">
-          {/* Reminder Intervals Section */}
-          <div className="bg-white border border-gray-200 rounded-lg p-6">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Bell className="w-5 h-5 text-blue-600" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">Reminder Intervals</h3>
-                <p className="text-sm text-gray-600">Select when to receive contract renewal reminders</p>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-              {[120, 90, 60, 30, 14, 7].map((days) => (
-                <label key={days} className="relative flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-                  <input
-                    type="checkbox"
-                    checked={reminderIntervals.includes(days)}
-                    onChange={() => handleReminderIntervalChange(days)}
-                    className="sr-only"
-                  />
-                  <div className={`w-5 h-5 rounded border-2 flex items-center justify-center mr-3 ${
-                    reminderIntervals.includes(days) 
-                      ? 'bg-slate-700 border-blue-600' 
-                      : 'border-gray-300'
-                  }`}>
-                    {reminderIntervals.includes(days) && (
-                      <CheckCircle className="w-3 h-3 text-white" />
-                    )}
-                  </div>
-                  <div>
-                    <div className="text-sm font-medium text-gray-900">{days} days</div>
-                    <div className="text-xs text-gray-500">before expiry</div>
-                  </div>
-                </label>
-              ))}
-            </div>
-          </div>
-
           {/* Notification Settings Section */}
           <div className="bg-white border border-gray-200 rounded-lg p-6">
             <div className="flex items-center gap-3 mb-6">
@@ -664,7 +648,7 @@ function SettingsPage() {
       case 'billing':
         return renderBillingSettings();
       case 'team':
-        return renderTeamSettings();
+        return <TeamManagement />;
       case 'reminders':
         return renderReminderSettings();
       default:
@@ -725,6 +709,8 @@ function SettingsPage() {
           </div>
         </div>
       </div>
+
+      {/* Using Stripe Customer Portal - no custom modals needed */}
     </div>
   );
 }

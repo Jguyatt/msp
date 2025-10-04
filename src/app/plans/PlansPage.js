@@ -42,7 +42,7 @@ function PlansPage() {
       price: { monthly: 0, annual: 0 },
       description: 'Perfect for individuals and small teams getting started',
       features: [
-        'Up to 5 contracts',
+        'Up to 2 contracts',
         'Email reminders (90/60/30 days)',
         'CSV contract upload',
         'PDF contract upload',
@@ -148,6 +148,17 @@ function PlansPage() {
     if (!currentSubscription) {
       return planName === 'Free'; // Default to Free if no subscription
     }
+    
+    // If subscription is active, show the actual plan as current
+    if (currentSubscription.status === 'active') {
+      return currentSubscription.plan_name === planName;
+    }
+    
+    // If subscription is canceled, only Free plan should show as current
+    if (currentSubscription.status === 'canceled') {
+      return planName === 'Free';
+    }
+    
     return currentSubscription.plan_name === planName;
   };
 
@@ -503,7 +514,7 @@ function PlansPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-6 justify-center">
             <Link
-              to="/app/dashboard"
+              to="/dashboard"
               className="inline-flex items-center justify-center px-8 py-4 bg-white text-blue-600 text-lg font-semibold rounded-xl hover:bg-gray-50 transition-all duration-200 shadow-xl hover:shadow-2xl hover:-translate-y-1"
             >
               Get Started

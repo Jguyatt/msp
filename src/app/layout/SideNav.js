@@ -4,7 +4,6 @@ import { useUser, useClerk } from '@clerk/clerk-react';
 import {
   ShieldCheck,
   Search,
-  Bell,
   Menu,
   X,
   ChevronDown,
@@ -17,7 +16,9 @@ import {
   CheckCircle,
   Home,
   FileText,
-  Upload
+  BarChart3,
+  CheckSquare,
+  Send,
 } from 'lucide-react';
 import useDisclosure from '../hooks/useDisclosure';
 import RenluLogo from '../../components/RenluLogo';
@@ -32,10 +33,7 @@ function SideNav() {
   const { clerkUser, supabaseUser, loading: userLoading } = useUserSync();
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
-  const [notifications, setNotifications] = useState([]);
-  const [loadingNotifications, setLoadingNotifications] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   
   // Update main content margin when sidebar state changes
@@ -49,37 +47,6 @@ function SideNav() {
   const searchRef = useRef(null);
   const searchInputRef = useRef(null);
 
-  // Fetch notifications
-  useEffect(() => {
-    const fetchNotifications = async () => {
-      if (userLoading || !supabaseUser) return;
-      
-      try {
-        setLoadingNotifications(true);
-        const contracts = await contractService.getContractsForUser(supabaseUser.email);
-        
-        // Create mock notifications based on contracts
-        const mockNotifications = contracts.slice(0, 3).map((contract, index) => ({
-          id: `notification-${index}`,
-          title: `Contract "${contract.contract_name}" expires in ${Math.floor(Math.random() * 30) + 1} days`,
-          message: `Vendor: ${contract.vendor}`,
-          time: new Date(Date.now() - index * 3600000).toISOString(),
-          type: 'contract_expiry',
-          read: false
-        }));
-        
-        setNotifications(mockNotifications);
-      } catch (error) {
-        console.error('Error fetching notifications:', error);
-      } finally {
-        setLoadingNotifications(false);
-      }
-    };
-
-    fetchNotifications();
-    const interval = setInterval(fetchNotifications, 5 * 60 * 1000);
-    return () => clearInterval(interval);
-  }, [clerkUser, supabaseUser, userLoading]);
 
   // Handle Cmd/Ctrl+K shortcut
   useEffect(() => {
@@ -115,9 +82,10 @@ function SideNav() {
   };
 
   const navLinks = [
-    { name: 'Dashboard', path: '/app/dashboard', icon: Home },
+    { name: 'Dashboard', path: '/dashboard', icon: Home },
     { name: 'Contracts', path: '/app/contracts', icon: FileText },
-    { name: 'Upload', path: '/app/upload', icon: Upload }
+    { name: 'Analytics', path: '/app/analytics', icon: BarChart3 },
+    { name: 'Todos', path: '/app/todos', icon: CheckSquare },
   ];
 
   const isActive = (path) => location.pathname === path;
@@ -125,17 +93,18 @@ function SideNav() {
   return (
     <>
       {/* Sidebar */}
-      <div className={`fixed left-0 top-0 h-full bg-slate-900 border-r border-slate-800 z-50 transition-all duration-300 ${
+      <div 
+        className={`fixed left-0 top-0 h-full bg-slate-900/95 backdrop-blur-xl border-r border-slate-800/50 z-50 transition-all duration-300 ${
         sidebarCollapsed ? 'w-16' : 'w-64'
       }`}>
         {/* Logo */}
-        <div className={`flex items-center border-b border-slate-800 ${
+        <div className={`flex items-center border-b border-slate-800/50 ${
           sidebarCollapsed ? 'justify-center p-3' : 'justify-between p-4'
         }`}>
           {!sidebarCollapsed && <RenluLogo size={32} variant="white" />}
           <button
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className="p-2 rounded-lg hover:bg-slate-800 transition-colors"
+            className="p-2 rounded-lg hover:bg-slate-800/50 backdrop-blur-sm transition-colors"
           >
             <Menu className="h-5 w-5 text-slate-300" />
           </button>
@@ -156,8 +125,8 @@ function SideNav() {
                         : 'gap-3 px-3 py-2'
                     } ${
                       isActive(link.path)
-                        ? 'bg-slate-800 text-white border-r-2 border-slate-300'
-                        : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                        ? 'bg-slate-800/50 backdrop-blur-sm text-white border-r-2 border-slate-300'
+                        : 'text-slate-300 hover:bg-slate-800/50 hover:text-white backdrop-blur-sm'
                     }`}
                     title={sidebarCollapsed ? link.name : undefined}
                   >
@@ -173,11 +142,11 @@ function SideNav() {
         </nav>
 
         {/* Bottom Section */}
-        <div className={`border-t border-slate-800 ${sidebarCollapsed ? 'p-2' : 'p-4'}`}>
+        <div className={`border-t border-slate-800/50 ${sidebarCollapsed ? 'p-2' : 'p-4'}`}>
           {/* Upgrade Button */}
           <Link
             to="/app/plans"
-            className={`w-full flex items-center bg-gradient-to-r from-slate-700 to-slate-600 text-white rounded-lg hover:from-slate-600 hover:to-slate-500 transition-all duration-200 mb-4 ${
+            className={`w-full flex items-center bg-gradient-to-r from-slate-700/80 to-slate-600/80 backdrop-blur-sm text-white rounded-lg hover:from-slate-600/80 hover:to-slate-500/80 transition-all duration-200 mb-4 ${
               sidebarCollapsed 
                 ? 'justify-center p-3' 
                 : 'gap-3 px-3 py-2'
@@ -192,7 +161,7 @@ function SideNav() {
           <div className="relative">
             <button
               onClick={() => setShowProfile(!showProfile)}
-              className={`w-full flex items-center rounded-lg hover:bg-slate-800 transition-colors ${
+              className={`w-full flex items-center rounded-lg hover:bg-slate-800/50 backdrop-blur-sm transition-colors ${
                 sidebarCollapsed 
                   ? 'justify-center p-3' 
                   : 'gap-3 px-3 py-2'
@@ -219,13 +188,13 @@ function SideNav() {
 
             {/* Profile Dropdown */}
             {showProfile && (
-              <div className={`absolute bottom-full mb-2 bg-white border border-gray-200 rounded-lg shadow-lg z-10 ${
+              <div className={`absolute bottom-full mb-2 bg-white/90 backdrop-blur-xl border border-white/30 rounded-lg shadow-xl z-10 ${
                 sidebarCollapsed ? 'left-0 right-0' : 'left-0 right-0'
               }`}>
                 <div className="p-2">
                   <Link
                     to="/app/settings"
-                    className="flex items-center gap-3 px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                    className="flex items-center gap-3 px-3 py-2 text-gray-700 hover:bg-white/50 backdrop-blur-sm rounded-lg transition-colors"
                     onClick={() => setShowProfile(false)}
                   >
                     <Settings className="h-4 w-4" />
@@ -236,7 +205,7 @@ function SideNav() {
                       signOut();
                       setShowProfile(false);
                     }}
-                    className="w-full flex items-center gap-3 px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                    className="w-full flex items-center gap-3 px-3 py-2 text-gray-700 hover:bg-white/50 backdrop-blur-sm rounded-lg transition-colors"
                   >
                     <LogOut className="h-4 w-4" />
                     <span className="text-sm">Sign out</span>
@@ -249,7 +218,7 @@ function SideNav() {
       </div>
 
       {/* Top Bar */}
-      <div className="fixed top-0 h-16 bg-slate-800 border-b border-slate-700 z-40 transition-all duration-300" 
+      <div className="fixed top-0 h-16 bg-slate-800/95 backdrop-blur-xl border-b border-slate-700/50 z-40 transition-all duration-300" 
            style={{ left: sidebarCollapsed ? '4rem' : '16rem', right: 0 }}>
         <div className="flex items-center justify-between h-full px-6">
           {/* Search */}
@@ -263,59 +232,13 @@ function SideNav() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleSearch(e)}
-                className="w-full pl-10 pr-4 py-2 border border-slate-600 rounded-lg focus:ring-2 focus:ring-slate-400 focus:border-transparent bg-slate-700 text-slate-100 placeholder-slate-400"
+                className="w-full pl-10 pr-4 py-2 border border-slate-600/50 rounded-lg focus:ring-2 focus:ring-slate-400 focus:border-transparent bg-slate-700/80 backdrop-blur-sm text-slate-100 placeholder-slate-400"
               />
             </div>
           </div>
 
           {/* Right side actions */}
           <div className="flex items-center gap-4">
-            {/* Notifications */}
-            <div className="relative">
-              <button
-                onClick={() => setShowNotifications(!showNotifications)}
-                className="relative p-2 text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg transition-colors"
-              >
-                <Bell className="h-5 w-5" />
-                {notifications.length > 0 && (
-                  <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                    {notifications.length}
-                  </span>
-                )}
-              </button>
-
-              {/* Notifications Dropdown */}
-              {showNotifications && (
-                <div className="absolute right-0 top-full mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
-                  <div className="p-4 border-b border-gray-200">
-                    <h3 className="text-sm font-medium text-gray-900">Notifications</h3>
-                  </div>
-                  <div className="max-h-64 overflow-y-auto">
-                    {loadingNotifications ? (
-                      <div className="p-4 text-center text-gray-500">Loading...</div>
-                    ) : notifications.length === 0 ? (
-                      <div className="p-4 text-center text-gray-500">No notifications</div>
-                    ) : (
-                      notifications.map((notification) => (
-                        <div key={notification.id} className="p-4 border-b border-gray-100 hover:bg-gray-50">
-                          <div className="flex items-start gap-3">
-                            <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                            <div className="flex-1">
-                              <p className="text-sm font-medium text-gray-900">{notification.title}</p>
-                              <p className="text-xs text-gray-500 mt-1">{notification.message}</p>
-                              <p className="text-xs text-gray-400 mt-1">
-                                {new Date(notification.time).toLocaleTimeString()}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-
             {/* Status Indicator */}
             <div className="flex items-center gap-2 text-sm text-slate-300">
               <CheckCircle className="h-4 w-4 text-green-400" />
@@ -327,8 +250,8 @@ function SideNav() {
 
       {/* Overlay for mobile */}
       {showSearch && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-start justify-center pt-20">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-start justify-center pt-20">
+          <div className="bg-white/90 backdrop-blur-xl rounded-lg shadow-xl border border-white/30 w-full max-w-md mx-4">
             <div className="p-4 border-b border-gray-200">
               <div className="flex items-center gap-3">
                 <Search className="h-5 w-5 text-gray-400" />

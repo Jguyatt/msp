@@ -5,6 +5,7 @@ import { ClerkProvider, SignedIn, SignedOut } from '@clerk/clerk-react';
 import './index.css';
 import AppRouter from './app/AppRouter';
 import LandingPage from './LandingPage';
+// PDF.js initialization disabled - using backend API instead
 
 // Clerk configuration for Create React App
 const publishableKey = process.env.REACT_APP_CLERK_PUBLISHABLE_KEY || 'pk_test_d29ya2luZy1taXRlLTYwLmNsZXJrLmFjY291bnRzLmRldiQ';

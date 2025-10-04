@@ -10,7 +10,10 @@ export function useUserSync() {
 
   useEffect(() => {
     const syncUser = async () => {
+      console.log('useUserSync: Starting sync - isLoaded:', isLoaded, 'clerkUser:', !!clerkUser);
+      
       if (!isLoaded || !clerkUser) {
+        console.log('useUserSync: Skipping sync - user not ready');
         setLoading(false);
         return;
       }
@@ -18,14 +21,15 @@ export function useUserSync() {
       try {
         setLoading(true);
         setError(null);
+        console.log('useUserSync: Syncing user with email:', clerkUser.emailAddresses[0].emailAddress);
 
         // Sync Clerk user with Supabase
         const syncedUser = await userService.syncClerkUser(clerkUser);
         setSupabaseUser(syncedUser);
 
-        console.log('User synced successfully:', syncedUser);
+        console.log('useUserSync: User synced successfully:', syncedUser);
       } catch (err) {
-        console.error('Error syncing user:', err);
+        console.error('useUserSync: Error syncing user:', err);
         setError(err.message);
       } finally {
         setLoading(false);

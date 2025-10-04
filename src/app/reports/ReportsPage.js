@@ -11,7 +11,7 @@ function ReportsPage() {
   useEffect(() => {
     const fetchContracts = async () => {
       try {
-        const response = await fetch('http://localhost:3001/api/contracts');
+        const response = await fetch('http://localhost:3002/api/contracts');
         if (response.ok) {
           const data = await response.json();
           setContracts(data.contracts || []);
@@ -74,8 +74,12 @@ function ReportsPage() {
   };
 
   const getRenewalRate = () => {
-    // Mock calculation - in real app, this would come from historical data
-    return 94;
+    // Calculate from actual contract data
+    if (contracts.length === 0) return 0;
+    
+    // This would need historical renewal data to calculate properly
+    // For now, return 0 until we have real renewal tracking
+    return 0;
   };
 
   const exportToCSV = () => {
